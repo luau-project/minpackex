@@ -1,0 +1,13 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+lib_name=@MINPACKEX_LIBRARY_NAME@
+libdir=${exec_prefix}/@MINPACKEX_INSTALL_LIBDIR@
+includedir=${prefix}/@MINPACKEX_INSTALL_INCLUDEDIR@
+version=@PROJECT_VERSION@
+
+Name: @MINPACKEX_LIBRARY_NAME@
+Description: An extension to MINPACK-1 software which solves nonlinear equations and nonlinear least squares problems.
+Version: ${version}
+Requires:
+Libs: -L${libdir} -l${lib_name} -lminpack
+Cflags: -I${includedir}
