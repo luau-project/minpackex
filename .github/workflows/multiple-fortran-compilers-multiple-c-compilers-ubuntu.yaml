@@ -1,5 +1,5 @@
 name: minpackex on Ubuntu
-run-name: minpack (multiple Fortran compilers), minpackex (GCC) on Ubuntu
+run-name: minpack (multiple Fortran compilers), minpackex (multiple C compilers) on Ubuntu
 on: [push]
 
 jobs:
@@ -35,8 +35,8 @@ jobs:
       
       - name: Set shell variables to build and install directories
         run: |
-          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/build" >> $GITHUB_ENV
-          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/install-gfortran" >> $GITHUB_ENV
+          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/minpack-build" >> $GITHUB_ENV
+          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/minpack-install" >> $GITHUB_ENV
       
       - name: Download minpack sources
         if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
@@ -91,7 +91,6 @@ jobs:
           - {COMPILER: gcc, VERSION: 13}
           - {COMPILER: intel, VERSION: '2024.1'}
           - {COMPILER: intel-classic, VERSION: '2021.10'}
-          - {COMPILER: nvidia-hpc, VERSION: '23.11'}
         
     steps:
 
@@ -111,8 +110,8 @@ jobs:
 
       - name: Set shell variables to build and install directories
         run: |
-          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/build" >> $GITHUB_ENV
-          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/install-gfortran" >> $GITHUB_ENV
+          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/minpack-build" >> $GITHUB_ENV
+          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/minpack-install" >> $GITHUB_ENV
 
       - name: Download minpack sources
         if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
