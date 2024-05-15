@@ -9,5 +9,5 @@ Name: @MINPACKEX_LIBRARY_NAME@
 Description: An extension to MINPACK-1 software which solves nonlinear equations and nonlinear least squares problems.
 Version: ${version}
 Requires:
-Libs: -L${libdir} -l${lib_name} -lminpack
-Cflags: -I${includedir}
+Libs: -L${libdir} -l${lib_name} @dependencies_lflags@
+Cflags: -I${includedir} @dependencies_cflags@

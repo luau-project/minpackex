@@ -7,27 +7,23 @@
 extern "C" {
 #endif
 
-#ifndef MINPACKEX_EXPORT
-#   if defined(BUILD_SHARED)
-#       if defined(_WIN32) || defined(_WIN64)
-#           if defined(__CYGWIN__) || defined(__MINGW32__)
-#               define MINPACKEX_EXPORT __attribute__((__visibility__("default")))
-#           else
-#               define MINPACKEX_EXPORT __declspec(dllexport)
-#           endif
-#       else
-#           define MINPACKEX_EXPORT __attribute__((__visibility__("default")))
-#       endif
+#if HAVE_VISIBILITY && BUILDING_LIBMINPACKEX
+#   define LIBMINPACKEX_SHLIB_EXPORTED __attribute__((__visibility__("default")))
+#elif (defined _WIN32 && !defined __CYGWIN__ && !defined __MINGW32__) && BUILDING_SHARED && BUILDING_LIBMINPACKEX
+#   if defined DLL_EXPORT
+#       define LIBMINPACKEX_SHLIB_EXPORTED __declspec(dllexport)
 #   else
-#       define MINPACKEX_EXPORT __attribute__((__visibility__("default")))
+#       define LIBMINPACKEX_SHLIB_EXPORTED
 #   endif
+#elif (defined _WIN32 && !defined __CYGWIN__ && !defined __MINGW32__) && BUILDING_SHARED
+#   define LIBMINPACKEX_SHLIB_EXPORTED __declspec(dllimport)
+#else
+#   define LIBMINPACKEX_SHLIB_EXPORTED
 #endif
 
-#if BUILDING_MINPACKEX
-#   define MINPACKEX_API MINPACKEX_EXPORT
-#else
-#   define MINPACKEX_API
-#endif
+#define MINPACKEX_API LIBMINPACKEX_SHLIB_EXPORTED
+
+#define MINPACKEX_VERSION "0.1.0"
 
 //
 // minpackex_enorm
@@ -49,7 +45,7 @@ double minpackex_dpmpar(int i);
 
 /* callback to minpackex_lmdif1 function */
 
-typedef void (*minpackex_lmdif1_callback)(void *userdata, int m, int n, double *x, double *fvec, int *iflag);
+typedef void (*minpackex_lmdif1_callback)(void *userdata, int m, int n, const double *x, double *fvec, int *iflag);
 
 /* minimize the sum of the squares of nonlinear functions in N
    variables by a modification of the Levenberg-Marquardt algorithm

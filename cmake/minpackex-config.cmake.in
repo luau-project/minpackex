@@ -1,0 +1,139 @@
+#                                                                                 #
+#                                                                                 #
+###################################################################################
+# License                                                                         #
+###################################################################################
+#                                                                                 #
+# Copyright (c) 2024 luau-project                                                 #
+#                    https://github.com/luau-project/minpackex                    #
+#                                                                                 #
+# Redistribution and use in source and binary forms, with or without              #
+# modification, are permitted provided that the following conditions are met:     #
+#                                                                                 #
+# 1. Redistributions of source code must retain the above copyright notice,       #
+# this list of conditions and the following disclaimer.                           #
+#                                                                                 #
+# 2. Redistributions in binary form must reproduce the above copyright            #
+# notice, this list of conditions and the following disclaimer in the             #
+# documentation and/or other materials provided with the distribution.            #
+#                                                                                 #
+# 3. Neither the name of the copyright holder nor the names of its                #
+# contributors may be used to endorse or promote products derived from this       #
+# software without specific prior written permission.                             #
+#                                                                                 #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”     #
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,           #
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR          #
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR               #
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,           #
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,             #
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;     #
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,        #
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR         #
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF          #
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                                      #
+#                                                                                 #
+###################################################################################
+# Start(Description of variables)                                                 #
+###################################################################################
+#                                                                                 #
+#     minpackex_FOUND .............. True if library and headers were found       #
+#     minpackex_ROOT_DIR ........... Root directory of minpackex                  #
+#     minpackex_INSTALL_PREFIX ..... Root directory of minpackex                  #
+#     minpackex_LIBRARY ............ Path to minpackex library                    #
+#     minpackex_LIBRARIES .......... minpackex libraries to link against          #
+#     minpackex_INCLUDE_DIR ........ Directory where header files are stored      #
+#     minpackex_INCLUDE_DIRS ....... List of include dirs needed to use minpackex #
+#     minpackex_VERSION_MAJOR ...... Major version of minpackex, if present       #
+#     minpackex_VERSION_MINOR ...... Minor version of minpackex, if present       #
+#     minpackex_VERSION_PATCH ...... Patch version of minpackex, if present       #
+#     minpackex_VERSION ............ Full version of minpackex                    #
+#     minpackex_RUNTIME ............ Directory holding .dll files on Windows      #
+#     minpackex_PKGCONFIG_DIR ...... Directory holding minpackex.pc, if present   #
+#                                                                                 #
+###################################################################################
+# End(Description of variables)                                                   #
+###################################################################################
+#                                                                                 #
+#                                                                                 #
+###################################################################################
+# Start(Description of targets)                                                   #
+###################################################################################
+#                                                                                 #
+#     minpackex_SHARED ............. The shared library target, if present        #
+#     minpackex_STATIC ............. The static library target, if present        #
+#                                                                                 #
+###################################################################################
+# End(Description of targets)                                                     #
+###################################################################################
+#                                                                                 #
+#                                                                                 #
+###################################################################################
+###################################################################################
+##                                 Body                                          ##
+###################################################################################
+###################################################################################
+#                                                                                 #
+#                                                                                 #
+
+get_filename_component(_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
+get_filename_component(_prefix "${_dir}/../.." ABSOLUTE)
+
+find_library(
+    minpackex_LIBRARY
+    NAMES @MINPACKEX_LIBRARY_NAME@
+    HINTS "${_prefix}/@MINPACKEX_INSTALL_LIBDIR@"
+    NO_DEFAULT_PATH
+)
+
+find_path(
+    minpackex_INCLUDE_DIR
+    NAMES @MINPACKEX_LIBRARY_NAME@.h
+    HINTS "${_prefix}/@MINPACKEX_INSTALL_INCLUDEDIR@"
+    NO_DEFAULT_PATH
+)
+
+find_package(minpack)
+
+set(minpackex_LIBRARIES ${minpackex_LIBRARY})
+set(minpackex_INCLUDE_DIRS ${minpackex_INCLUDE_DIR})
+
+mark_as_advanced(minpackex_LIBRARY)
+
+if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR AND minpack_FOUND)
+    set(minpackex_FOUND TRUE)
+    set(minpackex_INSTALL_PREFIX ${_prefix})
+    set(minpackex_ROOT_DIR ${_prefix})
+
+    foreach(__minpack_lib ${minpack_LIBRARIES})
+        list(APPEND minpackex_LIBRARIES "${__minpack_lib}")
+    endforeach()
+
+    foreach(__minpack_incdir ${minpack_INCLUDE_DIRS})
+        list(APPEND minpackex_INCLUDE_DIRS "${__minpack_incdir}")
+    endforeach()
+endif()
+
+if (DEFINED minpackex_LIBRARY AND EXISTS "${minpackex_LIBRARY}/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
+    # Import the targets.
+    include("${minpackex_LIBRARY}/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
+    
+    set(minpackex_VERSION_MAJOR @MINPACKEX_VERSION_MAJOR@)
+    set(minpackex_VERSION_MINOR @MINPACKEX_VERSION_MINOR@)
+    set(minpackex_VERSION_PATCH @MINPACKEX_VERSION_PATCH@)
+endif()
+
+if (WIN32)
+    find_path(
+        minpackex_RUNTIME
+        NAMES "@MINPACKEX_LIBRARY_NAME@.dll;lib@MINPACKEX_LIBRARY_NAME@.dll"
+        HINTS "${_prefix}/@MINPACKEX_INSTALL_BINDIR@"
+        NO_DEFAULT_PATH
+    )
+endif()
+
+if (EXISTS "${_prefix}/@MINPACKEX_INSTALL_PKGCONFIGDIR@/@MINPACKEX_LIBRARY_NAME@.pc")
+    set(minpackex_PKGCONFIG_DIR "${_prefix}/@MINPACKEX_INSTALL_PKGCONFIGDIR@")
+endif()
+
+set(minpackex_VERSION @PROJECT_VERSION@)
