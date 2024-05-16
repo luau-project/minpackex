@@ -56,7 +56,12 @@ jobs:
         with:
           compiler: ${{ matrix.TOOLCHAIN.COMPILER }}
           version: ${{ matrix.TOOLCHAIN.VERSION }}
-        
+      
+      - name: Override C compiler to use MSVC cl
+        run: |
+          Add-Content $env:GITHUB_ENV "CC=cl"
+          Add-Content $env:GITHUB_ENV "CXX=cl"
+
       - name: Configure the build of minpack
         run: cmake -G "NMake Makefiles" -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
       
