@@ -41,7 +41,7 @@
 #                                                                                 #
 #                                                                                 #
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.21)
 
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type.")
 option(BUILD_SHARED_LIBS "Build the shared library." ON)
@@ -211,6 +211,25 @@ if (BUILD_SHARED_LIBS)
                 "tests/${MINPACKEX_TEST_NAME}-minpack.c"
                 "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
             )
+
+            if (WIN32)
+                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
+                    if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+                    else()
+                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+                    endif()
+
+                    if (EXISTS "${__minpack_dll}")
+                        add_custom_command(
+                            TARGET ${MINPACKEX_LIB_TEST_NAME}
+                            POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                        )
+                    endif()
+                endif()
+            endif()
+
             target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
             target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_SHARED_LIB} ${minpack_LIBRARIES})
 
@@ -260,6 +279,25 @@ if (BUILD_STATIC_LIBS)
                 "tests/${MINPACKEX_TEST_NAME}-minpack.c"
                 "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
             )
+
+            if (WIN32)
+                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
+                    if ("${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+                    else()
+                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+                    endif()
+
+                    if (EXISTS "${__minpack_dll}")
+                        add_custom_command(
+                            TARGET ${MINPACKEX_LIB_TEST_NAME}
+                            POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                        )
+                    endif()
+                endif()
+            endif()
+
             target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
             target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_STATIC_LIB} ${minpack_LIBRARIES})
 
