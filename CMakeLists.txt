@@ -213,19 +213,20 @@ if (BUILD_SHARED_LIBS)
             )
 
             if (WIN32)
-                if (TARGET minpack_SHARED)
-                    add_custom_command(
-                        TARGET ${MINPACKEX_LIB_TEST_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:minpack_SHARED>
-                    )
-                else()
-                    add_custom_command(
-                        TARGET ${MINPACKEX_LIB_TEST_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-                    )
+                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
+                    if ("${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+                    else()
+                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+                    endif()
+
+                    if (EXISTS "${__minpack_dll}")
+                        add_custom_command(
+                            TARGET ${MINPACKEX_LIB_TEST_NAME}
+                            POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                        )
+                    endif()
                 endif()
             endif()
 
@@ -280,19 +281,20 @@ if (BUILD_STATIC_LIBS)
             )
 
             if (WIN32)
-                if (TARGET minpack_SHARED)
-                    add_custom_command(
-                        TARGET ${MINPACKEX_LIB_TEST_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:minpack_SHARED>
-                    )
-                else()
-                    add_custom_command(
-                        TARGET ${MINPACKEX_LIB_TEST_NAME}
-                        POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-                    )
+                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
+                    if ("${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+                    else()
+                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+                    endif()
+
+                    if (EXISTS "${__minpack_dll}")
+                        add_custom_command(
+                            TARGET ${MINPACKEX_LIB_TEST_NAME}
+                            POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                        )
+                    endif()
                 endif()
             endif()
 
