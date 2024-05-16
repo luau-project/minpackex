@@ -46,7 +46,7 @@ jobs:
       
       - name: Setup LLVM Flang
         run: |
-          codename = $(lsb_release -c -s)
+          codename=$(lsb_release -c -s)
           echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" > $RUNNER_TEMP/llvm-flang.list
           echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" >> $RUNNER_TEMP/llvm-flang.list
           echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename-17 main" >> $RUNNER_TEMP/llvm-flang.list
