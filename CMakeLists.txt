@@ -212,11 +212,22 @@ if (BUILD_SHARED_LIBS)
                 "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
             )
 
-            add_custom_command(
-                TARGET ${MINPACKEX_LIB_TEST_NAME}
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-            )
+            if (WIN32)
+                if (TARGET minpack_SHARED)
+                    add_custom_command(
+                        TARGET ${MINPACKEX_LIB_TEST_NAME}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:minpack_SHARED>
+                    )
+                else()
+                    add_custom_command(
+                        TARGET ${MINPACKEX_LIB_TEST_NAME}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
+                    )
+                endif()
+            endif()
 
             target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
             target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_SHARED_LIB} ${minpack_LIBRARIES})
@@ -268,11 +279,22 @@ if (BUILD_STATIC_LIBS)
                 "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
             )
 
-            add_custom_command(
-                TARGET ${MINPACKEX_LIB_TEST_NAME}
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
-            )
+            if (WIN32)
+                if (TARGET minpack_SHARED)
+                    add_custom_command(
+                        TARGET ${MINPACKEX_LIB_TEST_NAME}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:minpack_SHARED>
+                    )
+                else()
+                    add_custom_command(
+                        TARGET ${MINPACKEX_LIB_TEST_NAME}
+                        POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> $<TARGET_RUNTIME_DLLS:${MINPACKEX_LIB_TEST_NAME}>
+                    )
+                endif()
+            endif()
 
             target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
             target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_STATIC_LIB} ${minpack_LIBRARIES})
