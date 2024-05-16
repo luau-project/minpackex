@@ -1,0 +1,90 @@
+name: minpackex on Ubuntu with minpack compiled by LLVM Flang
+run-name: minpack (LLVM Flang), minpackex (GCC) on Ubuntu
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_DOWNLOAD: ['OFF']
+        CMAKE_BUILD_TYPE: ['Release', 'Debug']
+        BUILD_SHARED_LIBS: ['ON', 'OFF']
+        BUILD_STATIC_LIBS: ['ON', 'OFF']
+        BUILD_TESTS: ['ON', 'OFF']
+        LLVM_FLANG_VERSION: ['18', '17']
+        
+        exclude:
+          
+          - BUILD_SHARED_LIBS: 'OFF'
+            BUILD_STATIC_LIBS: 'OFF'
+          
+    steps:
+
+      - name: Checkout minpack-builder assets
+        uses: actions/checkout@v4
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
+        with:
+          repository: luau-project/minpack-builder
+          ref: assets-ci-v1
+          path: assets
+      
+      - name: Checkout minpack-builder repository to minpack-builder directory
+        uses: actions/checkout@v4
+        with:
+          repository: luau-project/minpack-builder
+          path: minpack-builder
+      
+      - name: Set shell variables to build and install directories (minpack)
+        run: |
+          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/minpack-build" >> $GITHUB_ENV
+          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/minpack-install" >> $GITHUB_ENV
+      
+      - name: Download minpack sources
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
+        run: for current_file in "disclaimer"  "chkder.f"  "dogleg.f"  "dpmpar.f"  "enorm.f"  "fdjac1.f"  "fdjac2.f"  "hybrd1.f"  "hybrd.f"  "hybrj1.f"  "hybrj.f"  "lmder1.f"  "lmder.f"  "lmdif1.f"  "lmdif.f"  "lmpar.f"  "lmstr1.f"  "lmstr.f"  "qform.f"  "qrfac.f"  "qrsolv.f"  "r1mpyq.f"  "r1updt.f"  "rwupdt.f"; do cp assets/${current_file} minpack-builder; done
+      
+      - name: Setup LLVM Flang
+        run: |
+          codename = $(lsb_release -c -s)
+          echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" > $RUNNER_TEMP/llvm-flang.list
+          echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" >> $RUNNER_TEMP/llvm-flang.list
+          echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename-17 main" >> $RUNNER_TEMP/llvm-flang.list
+          echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename-17 main" >> $RUNNER_TEMP/llvm-flang.list
+          echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename-18 main" >> $RUNNER_TEMP/llvm-flang.list
+          echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename-18 main" >> $RUNNER_TEMP/llvm-flang.list
+          sudo mv $RUNNER_TEMP/llvm-flang.list /etc/apt/sources.list.d/
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc  
+          sudo apt update
+          sudo apt install -f -y libllvm-${{ matrix.LLVM_FLANG_VERSION }}-ocaml-dev libllvm${{ matrix.LLVM_FLANG_VERSION }} llvm-${{ matrix.LLVM_FLANG_VERSION }} llvm-${{ matrix.LLVM_FLANG_VERSION }}-dev llvm-${{ matrix.LLVM_FLANG_VERSION }}-doc llvm-${{ matrix.LLVM_FLANG_VERSION }}-examples llvm-${{ matrix.LLVM_FLANG_VERSION }}-runtime clang-${{ matrix.LLVM_FLANG_VERSION }} clang-tools-${{ matrix.LLVM_FLANG_VERSION }} clang-${{ matrix.LLVM_FLANG_VERSION }}-doc libclang-common-${{ matrix.LLVM_FLANG_VERSION }}-dev libclang-${{ matrix.LLVM_FLANG_VERSION }}-dev libclang1-${{ matrix.LLVM_FLANG_VERSION }} clang-format-${{ matrix.LLVM_FLANG_VERSION }} python3-clang-${{ matrix.LLVM_FLANG_VERSION }} clangd-${{ matrix.LLVM_FLANG_VERSION }} clang-tidy-${{ matrix.LLVM_FLANG_VERSION }} libclang-rt-${{ matrix.LLVM_FLANG_VERSION }}-dev libmlir-${{ matrix.LLVM_FLANG_VERSION }}-dev mlir-${{ matrix.LLVM_FLANG_VERSION }}-tools flang-${{ matrix.LLVM_FLANG_VERSION }}
+      
+      - name: Configure the build of minpack
+        run: cmake -G "Unix Makefiles" -DCMAKE_Fortran_COMPILER=flang-new-${{ matrix.LLVM_FLANG_VERSION }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $MINPACK_INSTALLDIR -S minpack-builder -B $MINPACK_BUILDDIR
+      
+      - name: Build minpack
+        run: cmake --build $MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Install minpack
+        run: cmake --install $MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set shell variables to build and install directories (minpackex)
+        run: |
+          echo "MINPACKEX_BUILDDIR=$RUNNER_TEMP/minpackex-build" >> $GITHUB_ENV
+          echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
+      
+      - name: Configure the build of minpackex
+        run: cmake -G "Unix Makefiles" "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Test minpackex
+        run: ctest --test-dir $MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Install minpackex
+        run: cmake --install $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
