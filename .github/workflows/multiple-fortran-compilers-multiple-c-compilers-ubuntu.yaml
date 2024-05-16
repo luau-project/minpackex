@@ -91,7 +91,11 @@ jobs:
           - {COMPILER: gcc, VERSION: 13}
           - {COMPILER: intel, VERSION: '2024.1'}
           - {COMPILER: intel-classic, VERSION: '2021.10'}
-        
+          - {COMPILER: nvidia-hpc, VERSION: '23.11'}
+        exclude:
+          - CMAKE_BUILD_TYPE: 'Debug'
+            TOOLCHAIN: {COMPILER: nvidia-hpc, VERSION: '23.11'}
+          
     steps:
 
       - name: Checkout minpack-builder assets
