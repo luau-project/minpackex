@@ -56,6 +56,7 @@ jobs:
         run: |
           Add-Content $env:GITHUB_ENV "MINPACK_BUILDDIR=$env:RUNNER_TEMP\minpack-build"
           Add-Content $env:GITHUB_ENV "MINPACK_INSTALLDIR=$env:RUNNER_TEMP\minpack-install"
+          Add-Content $env:GITHUB_ENV ("MINPACK_PREFIX=" + "$env:RUNNER_TEMP\minpackex-install".Replace("\", "/"))
 
       - name: Download minpack sources
         if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
@@ -81,7 +82,7 @@ jobs:
           Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
 
       - name: Configure the build of minpackex
-        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
+        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
