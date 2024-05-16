@@ -87,10 +87,6 @@ jobs:
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
-      - name: Add the binary directory of minpack's shared library to system environment PATH
-        if: ${{ matrix.BUILD_SHARED_LIBS=='ON' }}
-        run: Add-Content $env:GITHUB_PATH "$env:MINPACK_INSTALLDIR\bin"
-
       - name: Test minpackex
         run: ctest --test-dir $env:MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
 
