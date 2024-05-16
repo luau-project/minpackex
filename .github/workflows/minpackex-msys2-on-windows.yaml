@@ -14,7 +14,7 @@ jobs:
         BUILD_TESTS: ['ON', 'OFF']
         MSYS2_CONFIG:
           - { sys: mingw64, env: x86_64, fc: gfortran, cc: gcc }
-          - { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: clang }
+          - { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: gcc }
           - { sys: clang64, env: clang-x86_64, fc: flang, cc: clang }
         
         exclude:
