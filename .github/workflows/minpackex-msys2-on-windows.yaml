@@ -1,0 +1,93 @@
+name: minpackex with MSYS2 toolchain on Windows
+run-name: minpack (GFortran, LLVM Flang-new GCC-like), minpackex (GCC, Clang) on Windows
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        USE_DOWNLOAD: ['OFF']
+        CMAKE_BUILD_TYPE: ['Release', 'Debug']
+        BUILD_SHARED_LIBS: ['ON', 'OFF']
+        BUILD_STATIC_LIBS: ['ON', 'OFF']
+        BUILD_TESTS: ['ON', 'OFF']
+        MSYS2_CONFIG:
+          - { sys: mingw64, env: x86_64, fc: gfortran, cc: gcc }
+          - { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: clang }
+          - { sys: clang64, env: clang-x86_64, fc: flang, cc: clang }
+        
+        exclude:
+          
+          - BUILD_SHARED_LIBS: 'OFF'
+            BUILD_STATIC_LIBS: 'OFF'
+
+    steps:
+
+      - name: Checkout minpack-builder assets
+        uses: actions/checkout@v4
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
+        with:
+          repository: luau-project/minpack-builder
+          ref: assets-ci-v1
+          path: assets
+      
+      - name: Checkout minpack-builder repository to minpack-builder directory
+        uses: actions/checkout@v4
+        with:
+          repository: luau-project/minpack-builder
+          path: minpack-builder
+      
+      - name: Update MSYS2
+        run: |
+          C:\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm --overwrite *"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm --overwrite *"
+      
+      - name: Install Fortran compiler + C compiler + GNU Make
+        run: C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make --noconfirm --overwrite *"
+      
+      - name: Add MSYS2 tools to system environment PATH, and set CC and FC environment variables
+        run: |
+          Add-Content $env:GITHUB_PATH "C:\msys64\${{ matrix.MSYS2_CONFIG.sys }}\bin"
+          Add-Content $env:GITHUB_ENV "CC=${{ matrix.MSYS2_CONFIG.cc }}"
+          Add-Content $env:GITHUB_ENV "FC=${{ matrix.MSYS2_CONFIG.fc }}"
+      
+      - name: Set environment variables to build and install directories (minpack)
+        run: |
+          Add-Content $env:GITHUB_ENV "MINPACK_BUILDDIR=$env:RUNNER_TEMP\minpack-build"
+          Add-Content $env:GITHUB_ENV "MINPACK_INSTALLDIR=$env:RUNNER_TEMP\minpack-install"
+
+      - name: Download minpack sources
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
+        run: foreach ($current_file in "disclaimer",  "chkder.f",  "dogleg.f",  "dpmpar.f",  "enorm.f",  "fdjac1.f",  "fdjac2.f",  "hybrd1.f",  "hybrd.f",  "hybrj1.f",  "hybrj.f",  "lmder1.f",  "lmder.f",  "lmdif1.f",  "lmdif.f",  "lmpar.f",  "lmstr1.f",  "lmstr.f",  "qform.f",  "qrfac.f",  "qrsolv.f",  "r1mpyq.f",  "r1updt.f",  "rwupdt.f") { Copy-Item "assets\$current_file" "minpack-builder"; }
+        
+      - name: Configure the build of minpack
+        run: cmake -G "MinGW Makefiles" -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
+      
+      - name: Build minpack
+        run: cmake --build $env:MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Install minpack
+        run: cmake --install $env:MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set environment variables to build and install directories (minpackex)
+        run: |
+          Add-Content $env:GITHUB_ENV "MINPACKEX_BUILDDIR=$env:RUNNER_TEMP\minpackex-build"
+          Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
+
+      - name: Configure the build of minpackex
+        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Test minpackex
+        run: ctest --test-dir $env:MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Install minpackex
+        run: cmake --install $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
