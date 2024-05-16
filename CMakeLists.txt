@@ -214,7 +214,7 @@ if (BUILD_SHARED_LIBS)
 
             if (WIN32)
                 if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
-                    if ("${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+                    if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
                         set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
                     else()
                         set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
