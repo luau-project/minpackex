@@ -56,7 +56,7 @@ jobs:
         run: |
           Add-Content $env:GITHUB_ENV "MINPACK_BUILDDIR=$env:RUNNER_TEMP\minpack-build"
           Add-Content $env:GITHUB_ENV "MINPACK_INSTALLDIR=$env:RUNNER_TEMP\minpack-install"
-          Add-Content $env:GITHUB_ENV ("MINPACK_PREFIX=" + "$env:RUNNER_TEMP\minpackex-install".Replace("\", "/"))
+          Add-Content $env:GITHUB_ENV ("MINPACK_PREFIX=" + "$env:RUNNER_TEMP\minpack-install".Replace("\", "/"))
 
       - name: Download minpack sources
         if: ${{ matrix.USE_DOWNLOAD=='OFF' }}
