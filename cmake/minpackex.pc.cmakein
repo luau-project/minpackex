@@ -4,6 +4,10 @@ lib_name=@MINPACKEX_LIBRARY_NAME@
 libdir=${exec_prefix}/@MINPACKEX_INSTALL_LIBDIR@
 includedir=${prefix}/@MINPACKEX_INSTALL_INCLUDEDIR@
 version=@PROJECT_VERSION@
+version_major=@MINPACKEX_VERSION_MAJOR@
+version_minor=@MINPACKEX_VERSION_MINOR@
+version_patch=@MINPACKEX_VERSION_PATCH@
+cmakeconfigdir=${libdir}/${lib_name}-${version}
 
 Name: @MINPACKEX_LIBRARY_NAME@
 Description: An extension to MINPACK-1 software which solves nonlinear equations and nonlinear least squares problems.
