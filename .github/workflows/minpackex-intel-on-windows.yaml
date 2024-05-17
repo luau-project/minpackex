@@ -1,5 +1,5 @@
 name: minpackex with Intel toolchain on Windows
-run-name: minpack (ifx, ifort), minpackex (MSVC) on Windows
+run-name: minpack (ifx, ifort), minpackex (Intel C compiler, MSVC cl) on Windows
 on: [push]
 
 jobs:
