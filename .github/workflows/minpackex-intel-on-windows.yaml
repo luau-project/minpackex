@@ -1,6 +1,6 @@
 name: minpackex with Intel toolchain on Windows
 run-name: minpack (ifx, ifort), minpackex (multiple C compilers) on Windows
-on: [push]
+on: [pull_request]
 
 jobs:
   build:

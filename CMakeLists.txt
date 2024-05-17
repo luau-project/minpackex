@@ -41,7 +41,7 @@
 #                                                                                 #
 #                                                                                 #
 
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.17)
 
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type.")
 option(BUILD_SHARED_LIBS "Build the shared library." ON)
@@ -88,9 +88,9 @@ if (WIN32)
     # def file required to generate import file (.lib) to link shared libraries
     # with Intel C compiler
     if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-        set(minpackex_def_file "minpackex.def")
+        set(minpackex_def_file "src/minpackex.def")
     else()
-        set(minpackex_def_file "libminpackex.def")
+        set(minpackex_def_file "src/libminpackex.def")
     endif()
 endif()
 
@@ -153,7 +153,7 @@ if (IS_ABSOLUTE "${MINPACKEX_INSTALL_PKGCONFIGDIR}")
 endif()
 
 # pkgconfig input file
-set(MINPACKEX_PKGCONFIG_INPUT "${MINPACKEX_LIBRARY_NAME}.pc.cmakein")
+set(MINPACKEX_PKGCONFIG_INPUT "cmake/${MINPACKEX_LIBRARY_NAME}.pc.cmakein")
 set(MINPACKEX_PKGCONFIG "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_LIBRARY_NAME}.pc")
 
 CHECK_C_SOURCE_COMPILES([[
@@ -212,9 +212,8 @@ if (BUILD_SHARED_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (DEFINED minpack_SHARED)
-        get_filename_component(_minpack_lib_dir "${minpack_LIBRARY}" PATH)
-        set(dependencies_lflags "\"-L${_minpack_lib_dir}\" -lminpack")
+    if (DEFINED minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+        set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
     if (BUILD_TESTING)
@@ -235,11 +234,11 @@ if (BUILD_SHARED_LIBS)
                         set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
                     endif()
 
-                    if (EXISTS "${__minpack_dll}")
+                    if (EXISTS ${__minpack_dll})
                         add_custom_command(
                             TARGET ${MINPACKEX_LIB_TEST_NAME}
                             POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                            COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
                         )
                     endif()
                 endif()
@@ -280,9 +279,8 @@ if (BUILD_STATIC_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (NOT DEFINED dependencies_lflags AND DEFINED minpack_SHARED)
-        get_filename_component(_minpack_lib_dir "${minpack_LIBRARY}" PATH)
-        set(dependencies_lflags "\"-L${_minpack_lib_dir}\" -lminpack")
+    if (NOT DEFINED dependencies_lflags AND DEFINED minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+        set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
     if (BUILD_TESTING)
@@ -303,11 +301,11 @@ if (BUILD_STATIC_LIBS)
                         set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
                     endif()
 
-                    if (EXISTS "${__minpack_dll}")
+                    if (EXISTS ${__minpack_dll})
                         add_custom_command(
                             TARGET ${MINPACKEX_LIB_TEST_NAME}
                             POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:${MINPACKEX_LIB_TEST_NAME}> "${__minpack_dll}"
+                            COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
                         )
                     endif()
                 endif()

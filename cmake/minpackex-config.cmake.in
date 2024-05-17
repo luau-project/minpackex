@@ -42,6 +42,7 @@
 #     minpackex_INSTALL_PREFIX ..... Root directory of minpackex                  #
 #     minpackex_LIBRARY ............ Path to minpackex library                    #
 #     minpackex_LIBRARIES .......... minpackex libraries to link against          #
+#     minpackex_LIBRARY_DIR ........ Directory where library files are stored     #
 #     minpackex_INCLUDE_DIR ........ Directory where header files are stored      #
 #     minpackex_INCLUDE_DIRS ....... List of include dirs needed to use minpackex #
 #     minpackex_VERSION_MAJOR ...... Major version of minpackex, if present       #
@@ -102,6 +103,7 @@ mark_as_advanced(minpackex_LIBRARY)
 
 if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR AND minpack_FOUND)
     set(minpackex_FOUND TRUE)
+    get_filename_component(minpackex_LIBRARY_DIR "${minpackex_LIBRARY}" PATH)
     set(minpackex_INSTALL_PREFIX ${_prefix})
     set(minpackex_ROOT_DIR ${_prefix})
 
@@ -114,9 +116,9 @@ if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR AND minpack_FOUN
     endforeach()
 endif()
 
-if (DEFINED minpackex_LIBRARY AND EXISTS "${minpackex_LIBRARY}/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
+if (DEFINED minpackex_LIBRARY AND EXISTS "${_prefix}/@MINPACKEX_INSTALL_LIBDIR@/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
     # Import the targets.
-    include("${minpackex_LIBRARY}/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
+    include("${_prefix}/@MINPACKEX_INSTALL_LIBDIR@/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
     
     set(minpackex_VERSION_MAJOR @MINPACKEX_VERSION_MAJOR@)
     set(minpackex_VERSION_MINOR @MINPACKEX_VERSION_MINOR@)
@@ -126,7 +128,7 @@ endif()
 if (WIN32)
     find_path(
         minpackex_RUNTIME
-        NAMES "@MINPACKEX_LIBRARY_NAME@.dll;lib@MINPACKEX_LIBRARY_NAME@.dll"
+        NAMES "@MINPACKEX_LIBRARY_NAME@.dll" "lib@MINPACKEX_LIBRARY_NAME@.dll"
         HINTS "${_prefix}/@MINPACKEX_INSTALL_BINDIR@"
         NO_DEFAULT_PATH
     )
