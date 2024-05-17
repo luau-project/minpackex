@@ -212,7 +212,7 @@ if (BUILD_SHARED_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (DEFINED minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+    if (TARGET minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
@@ -279,7 +279,7 @@ if (BUILD_STATIC_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (NOT DEFINED dependencies_lflags AND DEFINED minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+    if (NOT DEFINED dependencies_lflags AND TARGET minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 

@@ -103,7 +103,7 @@ mark_as_advanced(minpackex_LIBRARY)
 
 if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR AND minpack_FOUND)
     set(minpackex_FOUND TRUE)
-    get_filename_component(minpackex_LIBRARY_DIR "${minpackex_LIBRARY}" PATH)
+    set(minpackex_LIBRARY_DIR "${_prefix}/@MINPACKEX_INSTALL_LIBDIR@")
     set(minpackex_INSTALL_PREFIX ${_prefix})
     set(minpackex_ROOT_DIR ${_prefix})
 
