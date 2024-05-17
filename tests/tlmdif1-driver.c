@@ -1,6 +1,10 @@
-#define _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+#   define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <stdio.h>
-#undef _CRT_SECURE_NO_WARNINGS
+#ifdef _WIN32
+#   undef _CRT_SECURE_NO_WARNINGS
+#endif
 #include "tlmdif1-minpack.h"
 #include "tlmdif1-minpackex.h"
 

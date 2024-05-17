@@ -67,10 +67,6 @@ find_package(minpack)
 # set the library name
 set(MINPACKEX_LIBRARY_NAME "minpackex")
 
-##
-## Main body
-##
-
 # source files
 set(MINPACKEX_SOURCE_FILES
     "src/minpackex_dpmpar.c"
@@ -88,9 +84,9 @@ if (WIN32)
     # def file required to generate import file (.lib) to link shared libraries
     # with Intel C compiler
     if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-        set(minpackex_def_file "src/minpackex.def")
+        set(MINPACKEX_DEF_FILE "src/minpackex.def")
     else()
-        set(minpackex_def_file "src/libminpackex.def")
+        set(MINPACKEX_DEF_FILE "src/libminpackex.def")
     endif()
 endif()
 
@@ -99,6 +95,12 @@ set(MINPACKEX_TEST_NAMES "tlmdif1")
 
 # checking compiler capabilities
 include(CheckCSourceCompiles)
+
+CHECK_C_SOURCE_COMPILES([[
+    extern __attribute__ ((visibility ("default"))) int f(void);
+    int main(void) { return f(); }
+    int f(void) { return 1; }
+]] HAVE_VISIBILITY)
 
 # use GNU directory conventions
 include(GNUInstallDirs)
@@ -156,14 +158,6 @@ endif()
 set(MINPACKEX_PKGCONFIG_INPUT "cmake/${MINPACKEX_LIBRARY_NAME}.pc.cmakein")
 set(MINPACKEX_PKGCONFIG "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_LIBRARY_NAME}.pc")
 
-CHECK_C_SOURCE_COMPILES([[
-    extern __attribute__ ((visibility ("default"))) int f(void);
-    int main(void) { return f(); }
-    int f(void) { return 1; }
-]] HAVE_VISIBILITY)
-
-enable_testing()
-
 # minpackex config cmake file to be transformed
 set(minpackex_config_cmake_in "cmake/${MINPACKEX_LIBRARY_NAME}-config.cmake.in")
 
@@ -182,6 +176,8 @@ set(minpackex_targets_export "${MINPACKEX_LIBRARY_NAME}-targets")
 # hold targets to install
 set(targets_to_install "")
 
+enable_testing()
+
 # build the shared library
 if (BUILD_SHARED_LIBS)
     set(MINPACKEX_SHARED_LIB "minpackex_SHARED")
@@ -190,7 +186,7 @@ if (BUILD_SHARED_LIBS)
     target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_SOURCE_FILES})
 
     if (WIN32)
-        target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${minpackex_def_file})
+        target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_DEF_FILE})
     endif()
 
     target_include_directories(${MINPACKEX_SHARED_LIB} PRIVATE ${minpack_INCLUDE_DIRS} src)
@@ -377,7 +373,11 @@ message(STATUS "   Dependencies:")
 message(STATUS "")
 message(STATUS "     minpack:")
 message(STATUS "")
-message(STATUS "       Found ......................... : ${minpack_FOUND}")
+if (minpack_FOUND)
+message(STATUS "       Found ......................... : YES")
+else()
+message(STATUS "       Found ......................... : NO")
+endif()
 message(STATUS "       Library ....................... : ${minpack_LIBRARY}")
 message(STATUS "       Include dir ................... : ${minpack_INCLUDE_DIR}")
 message(STATUS "")
@@ -387,9 +387,9 @@ message(STATUS "     Build type ...................... : ${CMAKE_BUILD_TYPE}")
 message(STATUS "     Build shared libs ............... : ${BUILD_SHARED_LIBS}")
 message(STATUS "     Build static libs ............... : ${BUILD_STATIC_LIBS}")
 if (BUILD_TESTING)
-message(STATUS "     Build tests ..................... : ${BUILD_TESTING}")
+message(STATUS "     Build tests ..................... : ON")
 else()
-message(STATUS "     Build tests ..................... : 0")
+message(STATUS "     Build tests ..................... : OFF")
 endif()
 message(STATUS " ")
 message(STATUS "   Install directories:")
