@@ -84,6 +84,13 @@ set(MINPACKEX_HEADER_FILES "src/minpackex.h")
 # license files
 set(MINPACKEX_LICENSE_FILES "LICENSE.md")
 
+# def file required to generate import file to DLLs on Intel C compiler
+if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+    set(minpackex_def_file "minpackex.def")
+else()
+    set(minpackex_def_file "libminpackex.def")
+endif()
+
 # test names
 set(MINPACKEX_TEST_NAMES "tlmdif1")
 
@@ -177,7 +184,7 @@ if (BUILD_SHARED_LIBS)
     set(MINPACKEX_SHARED_LIB "minpackex_SHARED")
 
     add_library(${MINPACKEX_SHARED_LIB} SHARED "")
-    target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_SOURCE_FILES})
+    target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_SOURCE_FILES} ${minpackex_def_file})
     target_include_directories(${MINPACKEX_SHARED_LIB} PRIVATE ${minpack_INCLUDE_DIRS} src)
     target_compile_definitions(${MINPACKEX_SHARED_LIB} PRIVATE "BUILDING_SHARED=1" "BUILDING_LIBMINPACKEX=1")
 

@@ -12,10 +12,11 @@ jobs:
         BUILD_SHARED_LIBS: ['ON', 'OFF']
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
+        C_COMPILER: ['intel', 'msvc']
         TOOLCHAIN:
           - {COMPILER: intel, VERSION: '2024.1'}
           - {COMPILER: intel-classic, VERSION: '2021.10'}
-        
+
         exclude:
           
           - BUILD_SHARED_LIBS: 'OFF'
@@ -58,6 +59,7 @@ jobs:
           version: ${{ matrix.TOOLCHAIN.VERSION }}
       
       - name: Override C compiler to use MSVC cl
+        if: ${{ matrix.C_COMPILER=='msvc' }}
         run: |
           Add-Content $env:GITHUB_ENV "CC=cl"
           Add-Content $env:GITHUB_ENV "CXX=cl"
