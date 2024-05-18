@@ -1,6 +1,6 @@
 name: minpackex on Ubuntu
 run-name: minpack (multiple Fortran compilers), minpackex (multiple C compilers) on Ubuntu
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
   build:

@@ -178,6 +178,24 @@ set(targets_to_install "")
 
 enable_testing()
 
+function( copy_minpack_dll_for_testing test_name )
+    if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
+        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+    else()
+        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+    endif()
+
+    if (EXISTS ${__minpack_dll})
+        add_custom_command(
+            TARGET ${test_name}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
+        )
+    else()
+        message(WARNING "Unable to find a DLL for minpack. Tests may fail if the dll directory is not on your system environment PATH variable.")
+    endif()
+endfunction()
+
 # build the shared library
 if (BUILD_SHARED_LIBS)
     set(MINPACKEX_SHARED_LIB "minpackex_SHARED")
@@ -224,19 +242,7 @@ if (BUILD_SHARED_LIBS)
 
             if (WIN32)
                 if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
-                    if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
-                    else()
-                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
-                    endif()
-
-                    if (EXISTS ${__minpack_dll})
-                        add_custom_command(
-                            TARGET ${MINPACKEX_LIB_TEST_NAME}
-                            POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
-                        )
-                    endif()
+                    copy_minpack_dll_for_testing(${MINPACKEX_LIB_TEST_NAME})
                 endif()
             endif()
 
@@ -291,19 +297,7 @@ if (BUILD_STATIC_LIBS)
 
             if (WIN32)
                 if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
-                    if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-                        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
-                    else()
-                        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
-                    endif()
-
-                    if (EXISTS ${__minpack_dll})
-                        add_custom_command(
-                            TARGET ${MINPACKEX_LIB_TEST_NAME}
-                            POST_BUILD
-                            COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
-                        )
-                    endif()
+                    copy_minpack_dll_for_testing(${MINPACKEX_LIB_TEST_NAME})
                 endif()
             endif()
 
