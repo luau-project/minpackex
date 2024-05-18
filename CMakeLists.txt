@@ -178,11 +178,11 @@ set(targets_to_install "")
 
 enable_testing()
 
-function( copy_minpack_dll_for_testing test_name )
+function( copy_minpack_dll_for_testing test_name minpack_dll_dir )
     if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-        set(__minpack_dll "${minpack_RUNTIME}/minpack.dll")
+        set(__minpack_dll "${minpack_dll_dir}/minpack.dll")
     else()
-        set(__minpack_dll "${minpack_RUNTIME}/libminpack.dll")
+        set(__minpack_dll "${minpack_dll_dir}/libminpack.dll")
     endif()
 
     if (EXISTS ${__minpack_dll})
@@ -195,6 +195,50 @@ function( copy_minpack_dll_for_testing test_name )
         message(WARNING "Unable to find a DLL for minpack. Tests may fail if the dll directory is not on your system environment PATH variable.")
     endif()
 endfunction()
+
+function(
+    setup_tests_for_lib_target
+    minpackex_lib_target
+    minpackex_lib_name
+    target_kind
+    minpack_shared_target
+    minpack_dll_dir
+    minpack_inc_dirs
+    minpack_libs
+    )
+    
+    foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
+        set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}-${target_kind}")
+        add_executable(
+            ${MINPACKEX_LIB_TEST_NAME}
+            "tests/${MINPACKEX_TEST_NAME}-driver.c"
+            "tests/${MINPACKEX_TEST_NAME}-minpack.c"
+            "tests/${MINPACKEX_TEST_NAME}-${minpackex_lib_name}.c"
+        )
+
+        if (WIN32)
+            if (TARGET ${minpack_shared_target} AND EXISTS "${minpack_dll_dir}")
+                copy_minpack_dll_for_testing(${MINPACKEX_LIB_TEST_NAME} "${minpack_dll_dir}")
+            endif()
+        endif()
+
+        target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests "${minpack_inc_dirs}")
+        target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${minpackex_lib_target} "${minpack_libs}")
+
+        if (UNIX)
+            target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE m)
+        endif()
+
+        set(CURRENT_MINPACKEX_TEST "${MINPACKEX_LIB_TEST_NAME}")
+        add_test(
+            NAME ${CURRENT_MINPACKEX_TEST}
+            COMMAND $<TARGET_FILE:${MINPACKEX_LIB_TEST_NAME}>
+            "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-${target_kind}-minpack.txt"
+            "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-${target_kind}-${minpackex_lib_name}.txt"
+        )
+    endforeach()
+endfunction()
+
 
 # build the shared library
 if (BUILD_SHARED_LIBS)
@@ -231,36 +275,15 @@ if (BUILD_SHARED_LIBS)
     endif()
 
     if (BUILD_TESTING)
-        foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
-            set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}_shared")
-            add_executable(
-                ${MINPACKEX_LIB_TEST_NAME}
-                "tests/${MINPACKEX_TEST_NAME}-driver.c"
-                "tests/${MINPACKEX_TEST_NAME}-minpack.c"
-                "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
-            )
-
-            if (WIN32)
-                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
-                    copy_minpack_dll_for_testing(${MINPACKEX_LIB_TEST_NAME})
-                endif()
-            endif()
-
-            target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
-            target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_SHARED_LIB} ${minpack_LIBRARIES})
-
-            if (UNIX)
-                target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE m)
-            endif()
-
-            set(CURRENT_MINPACKEX_TEST "${MINPACKEX_LIB_TEST_NAME}")
-            add_test(
-                NAME ${CURRENT_MINPACKEX_TEST}
-                COMMAND $<TARGET_FILE:${MINPACKEX_LIB_TEST_NAME}>
-                "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-shared-minpack.txt"
-                "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-shared-${MINPACKEX_LIBRARY_NAME}.txt"
-            )
-        endforeach()
+        setup_tests_for_lib_target(
+            ${MINPACKEX_SHARED_LIB}
+            ${MINPACKEX_LIBRARY_NAME}
+            "shared"
+            "minpack_SHARED"
+            "${minpack_RUNTIME_DIR}"
+            "${minpack_INCLUDE_DIRS}"
+            "${minpack_LIBRARIES}"
+        )
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_SHARED_LIB})
@@ -286,36 +309,15 @@ if (BUILD_STATIC_LIBS)
     endif()
 
     if (BUILD_TESTING)
-        foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
-            set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}_static")
-            add_executable(
-                ${MINPACKEX_LIB_TEST_NAME}
-                "tests/${MINPACKEX_TEST_NAME}-driver.c"
-                "tests/${MINPACKEX_TEST_NAME}-minpack.c"
-                "tests/${MINPACKEX_TEST_NAME}-${MINPACKEX_LIBRARY_NAME}.c"
-            )
-
-            if (WIN32)
-                if (TARGET minpack_SHARED AND DEFINED minpack_RUNTIME)
-                    copy_minpack_dll_for_testing(${MINPACKEX_LIB_TEST_NAME})
-                endif()
-            endif()
-
-            target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests ${minpack_INCLUDE_DIRS})
-            target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${MINPACKEX_STATIC_LIB} ${minpack_LIBRARIES})
-
-            if (UNIX)
-                target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE m)
-            endif()
-
-            set(CURRENT_MINPACKEX_TEST "${MINPACKEX_LIB_TEST_NAME}")
-            add_test(
-                NAME ${CURRENT_MINPACKEX_TEST}
-                COMMAND $<TARGET_FILE:${MINPACKEX_LIB_TEST_NAME}>
-                "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-static-minpack.txt"
-                "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_TEST_NAME}-static-${MINPACKEX_LIBRARY_NAME}.txt"
-            )
-        endforeach()
+        setup_tests_for_lib_target(
+            ${MINPACKEX_STATIC_LIB}
+            ${MINPACKEX_LIBRARY_NAME}
+            "static"
+            "minpack_SHARED"
+            "${minpack_RUNTIME_DIR}"
+            "${minpack_INCLUDE_DIRS}"
+            "${minpack_LIBRARIES}"
+        )
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_STATIC_LIB})
