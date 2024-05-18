@@ -32,7 +32,7 @@ function(
 
                 if (EXISTS ${__minpack_dll})
                     add_custom_command(
-                        TARGET ${test_name}
+                        TARGET ${MINPACKEX_LIB_TEST_NAME}
                         POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
                     )
