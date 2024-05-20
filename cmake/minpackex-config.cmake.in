@@ -105,7 +105,7 @@ if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR)
     set(minpackex_INSTALL_PREFIX ${_prefix})
     set(minpackex_ROOT_DIR ${_prefix})
 
-    find_package(minpack)
+    find_package(minpack QUIET)
 
     if (minpack_FOUND)
         foreach(__minpack_lib ${minpack_LIBRARIES})

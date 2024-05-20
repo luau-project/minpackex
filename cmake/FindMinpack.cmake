@@ -55,7 +55,7 @@ elseif(DEFINED minpack_DIR)
     set(minpack_LIBRARY "${minpack_LIBRARIES}")
 
 else()
-    find_package(minpack)
+    find_package(minpack QUIET)
 
     if (NOT minpack_FOUND)
         find_path(minpack_INCLUDE_DIRS
@@ -78,5 +78,6 @@ else()
 
         set(minpack_FOUND TRUE)
         set(minpack_LIBRARY "${minpack_LIBRARIES}")
+        set(minpack_INCLUDE_DIR "${minpack_INCLUDE_DIRS}")
     endif()
 endif()

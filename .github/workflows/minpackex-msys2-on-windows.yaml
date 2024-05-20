@@ -92,3 +92,60 @@ jobs:
 
       - name: Install minpackex
         run: cmake --install $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
+  build-using-minpack-as-system-library:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        USE_DOWNLOAD: ['OFF']
+        CMAKE_BUILD_TYPE: ['Release', 'Debug']
+        BUILD_SHARED_LIBS: ['ON', 'OFF']
+        BUILD_STATIC_LIBS: ['ON', 'OFF']
+        BUILD_TESTS: ['ON', 'OFF']
+        MSYS2_CONFIG:
+          - { sys: mingw64, env: x86_64, cc: gcc }
+          - { sys: ucrt64, env: ucrt-x86_64, cc: gcc }
+          - { sys: clang64, env: clang-x86_64, cc: clang }
+        
+        exclude:
+          
+          - BUILD_SHARED_LIBS: 'OFF'
+            BUILD_STATIC_LIBS: 'OFF'
+
+    steps:
+
+      - name: Update MSYS2
+        run: |
+          C:\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm --overwrite *"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm --overwrite *"
+      
+      - name: Install C compiler + GNU Make + libminpack
+        run: C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack --noconfirm --overwrite *"
+      
+      - name: Add MSYS2 tools to system environment PATH, set CC and MINPACK_PREFIX environment variables
+        run: |
+          Add-Content $env:GITHUB_PATH "C:\msys64\${{ matrix.MSYS2_CONFIG.sys }}\bin"
+          Add-Content $env:GITHUB_ENV "CC=${{ matrix.MSYS2_CONFIG.cc }}"
+          Add-Content $env:GITHUB_ENV ("MINPACK_PREFIX=" + "C:\msys64\${{ matrix.MSYS2_CONFIG.sys }}".Replace("\", "/"))
+      
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set environment variables to build and install directories (minpackex)
+        run: |
+          Add-Content $env:GITHUB_ENV "MINPACKEX_BUILDDIR=$env:RUNNER_TEMP\minpackex-build"
+          Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
+
+      - name: Configure the build of minpackex
+        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Test minpackex
+        run: ctest --test-dir $env:MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Install minpackex
+        run: cmake --install $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
