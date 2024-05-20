@@ -13,9 +13,9 @@ if (DEFINED minpack_INCLUDE_DIR AND DEFINED minpack_LIBRARY_DIR)
         REQUIRED
     )
     
-    get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
-
     if (WIN32)
+        get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
+        
         find_path(minpack_RUNTIME_DIR
             NAMES minpack.dll libminpack.dll
             HINTS "${__minpack_prefix}/bin"
@@ -45,9 +45,9 @@ elseif(DEFINED minpack_DIR)
         REQUIRED
     )
 
-    get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
-
     if (WIN32)
+        get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
+
         find_path(minpack_RUNTIME_DIR
             NAMES minpack.dll libminpack.dll
             HINTS "${__minpack_prefix}/bin"
@@ -72,9 +72,9 @@ else()
             REQUIRED
         )
 
-        get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
-
         if (WIN32)
+            get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
+
             find_path(minpack_RUNTIME_DIR
                 NAMES minpack.dll libminpack.dll
                 HINTS "${__minpack_prefix}/bin"
@@ -84,6 +84,7 @@ else()
 
         set(minpack_FOUND TRUE)
         set(minpack_LIBRARY "${minpack_LIBRARIES}")
+        get_filename_component(minpack_LIBRARY_DIR "${minpack_LIBRARIES}" PATH)
         set(minpack_INCLUDE_DIR "${minpack_INCLUDE_DIRS}")
     endif()
 endif()
