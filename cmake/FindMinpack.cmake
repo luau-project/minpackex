@@ -22,6 +22,7 @@ if (DEFINED minpack_INCLUDE_DIR AND DEFINED minpack_LIBRARY_DIR)
     )
 
     set(minpack_FOUND TRUE)
+    set(minpack_LIBRARY "${minpack_LIBRARIES}")
 
 elseif(DEFINED minpack_DIR)
 
@@ -51,6 +52,7 @@ elseif(DEFINED minpack_DIR)
     )
 
     set(minpack_FOUND TRUE)
+    set(minpack_LIBRARY "${minpack_LIBRARIES}")
 
 else()
     find_package(minpack)
@@ -75,5 +77,6 @@ else()
         )
 
         set(minpack_FOUND TRUE)
+        set(minpack_LIBRARY "${minpack_LIBRARIES}")
     endif()
 endif()
