@@ -58,6 +58,31 @@ void minpackex_lmdif1(
     int m, int n, double *x, double *fvec, double tol,
     int *info, int *iwa, double *wa, int lwa);
 
+
+//
+// minpackex_lmdif
+// 
+
+/* callback to minpackex_lmdif function */
+
+typedef void (*minpackex_lmdif_callback)(void *userdata, int m, int n, const double *x, double *fvec, int *iflag);
+
+/* minimize the sum of the squares of nonlinear functions in N
+   variables by a modification of the Levenberg-Marquardt algorithm
+   (Jacobian calculated by a forward-difference approximation, more
+   general) */
+
+MINPACKEX_API
+void minpackex_lmdif(
+    void * userdata,
+    minpackex_lmdif_callback callback,
+    int m, int n, double *x, double *fvec, double ftol,
+    double xtol, double gtol, int maxfev, double epsfcn,
+    double *diag, int mode, double factor, int nprint,
+    int *info, int *nfev, double *fjac, int ldfjac, int *ipvt,
+    double *qtf, double *wa1, double *wa2, double *wa3,
+    double *wa4 );
+
 #ifdef __cplusplus
 }
 #endif

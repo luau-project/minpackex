@@ -70,9 +70,10 @@ set(MINPACKEX_SOURCE_FILES
     "src/minpackex_dpmpar.c"
     "src/minpackex_enorm.c"
     "src/minpackex_lmdif1.c"
+    "src/minpackex_lmdif.c"
 )
 
-# header files
+# installable header files
 set(MINPACKEX_HEADER_FILES "src/minpackex.h")
 
 # license files

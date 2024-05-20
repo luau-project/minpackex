@@ -1,29 +1,11 @@
 #include "minpackex.h"
+#include "minpackex_param.h"
 
-typedef struct ModifiedMParam ModifiedMParam;
-
-/*
-** The goal of ModifiedMParam
-** is the exploitation of m param.
-** We place extra data (userdata and
-** a modified callback signature).
-** at the end of int *m pointer.
-** Since MINPACK-1 just
-** operates on m as int, it seems
-** a "safe" hack to employ.
-*/
-
-struct ModifiedMParam
+static void __minpack_lmdif1_callback(int *m, int *n, double *x, double *fvec, int *iflag)
 {
-    int m;
-    void *userdata;
-    minpackex_lmdif1_callback callback;
-};
-
-static void minpack_callback(int *m, int *n, double *x, double *fvec, int *iflag)
-{
-    ModifiedMParam *modifiedM = (ModifiedMParam *)(void *)m;
-    modifiedM->callback(modifiedM->userdata, modifiedM->m, *n, x, fvec, iflag);
+    ModifiedIntParam *modifiedM = (ModifiedIntParam *)(void *)m;
+    minpackex_lmdif1_callback userCallback = (minpackex_lmdif1_callback)(modifiedM->callback);
+    userCallback(modifiedM->userdata, modifiedM->param, *n, x, fvec, iflag);
 }
 
 MINPACKEX_API
@@ -33,10 +15,10 @@ void minpackex_lmdif1(
     int m, int n, double *x, double *fvec, double tol,
     int *info, int *iwa, double *wa, int lwa)
 {
-    ModifiedMParam m_param;
-    m_param.m = m;
+    ModifiedIntParam m_param;
+    m_param.param = m;
     m_param.userdata = userdata;
-    m_param.callback = callback;
+    m_param.callback = (void *)callback;
 
-    lmdif1_(minpack_callback, (int *)(&m_param), &n, x, fvec, &tol, info, iwa, wa, &lwa);
+    lmdif1_(__minpack_lmdif1_callback, (int *)(&m_param), &n, x, fvec, &tol, info, iwa, wa, &lwa);
 }

@@ -2,7 +2,7 @@
 ** This test program was adapted
 ** from debian science team
 ** repository for minpack
-** https://salsa.debian.org/science-team/minpack/-/blob/354dafc0ac489dc89f3347fe5b4b6fc0a71837db/debian/tchkder.c
+** https://salsa.debian.org/science-team/minpack/-/blob/354dafc0ac489dc89f3347fe5b4b6fc0a71837db/debian/tlmdif1.c
 */
 
 /*     driver for lmdif1 example. */
@@ -12,9 +12,9 @@
 #include "minpackex.h"
 #include "tlmdif1-minpackex.h"
 
-void minpackex_fcn(void *userdata, int m, int n, const double *x, double *fvec, int *iflag)
+void minpackex_lmdif1_fcn(void *userdata, int m, int n, const double *x, double *fvec, int *iflag)
 {
-    /* function minpackex_fcn for lmdif1 example */
+    /* function minpackex_lmdif1_fcn for lmdif1 example */
 
     int i;
     double tmp1, tmp2, tmp3;
@@ -55,7 +55,7 @@ void tlmdif1_minpackex_write_content(FILE *file)
 
     tol = sqrt(minpackex_dpmpar(one));
 
-    minpackex_lmdif1((void *)0, &minpackex_fcn, m, n, x, fvec, tol, &info, iwa, wa, lwa);
+    minpackex_lmdif1((void *)0, &minpackex_lmdif1_fcn, m, n, x, fvec, tol, &info, iwa, wa, lwa);
 
     fnorm = minpackex_enorm(m, fvec);
 
