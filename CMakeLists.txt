@@ -62,8 +62,6 @@ project(minpackex
     LANGUAGES C
 )
 
-find_package(minpack)
-
 # set the library name
 set(MINPACKEX_LIBRARY_NAME "minpackex")
 
@@ -173,6 +171,8 @@ set(minpackex_targets_export "${MINPACKEX_LIBRARY_NAME}-targets")
 # hold targets to install
 set(targets_to_install "")
 
+include(cmake/FindMinpack.cmake)
+
 enable_testing()
 
 if (BUILD_TESTING)
@@ -209,7 +209,7 @@ if (BUILD_SHARED_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (TARGET minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+    if ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.so$"))
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
@@ -218,7 +218,6 @@ if (BUILD_SHARED_LIBS)
             ${MINPACKEX_SHARED_LIB}
             ${MINPACKEX_LIBRARY_NAME}
             "shared"
-            "minpack_SHARED"
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"
@@ -243,7 +242,7 @@ if (BUILD_STATIC_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if (NOT DEFINED dependencies_lflags AND TARGET minpack_SHARED AND DEFINED minpack_LIBRARY_DIR)
+    if ((NOT DEFINED dependencies_lflags) AND ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.so$")))
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
@@ -252,7 +251,6 @@ if (BUILD_STATIC_LIBS)
             ${MINPACKEX_STATIC_LIB}
             ${MINPACKEX_LIBRARY_NAME}
             "static"
-            "minpack_SHARED"
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"

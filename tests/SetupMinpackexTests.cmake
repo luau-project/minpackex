@@ -7,7 +7,6 @@ function(
     minpackex_lib_target
     minpackex_lib_name
     target_kind
-    minpack_shared_target
     minpack_dll_dir
     minpack_inc_dirs
     minpack_libs
@@ -23,7 +22,7 @@ function(
         )
 
         if (WIN32)
-            if (TARGET ${minpack_shared_target} AND EXISTS "${minpack_dll_dir}")
+            if (EXISTS "${minpack_dll_dir}")
                 if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
                     set(__minpack_dll "${minpack_dll_dir}/minpack.dll")
                 else()
