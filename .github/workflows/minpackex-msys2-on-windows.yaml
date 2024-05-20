@@ -3,7 +3,7 @@ run-name: minpack (GFortran, LLVM Flang-new GCC-like), minpackex (GCC, Clang) on
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-using-minpack-as-cmake-package:
     runs-on: windows-latest
     strategy:
       matrix:

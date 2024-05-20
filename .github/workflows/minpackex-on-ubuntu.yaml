@@ -3,7 +3,7 @@ run-name: minpack (multiple Fortran compilers), minpackex (multiple C compilers)
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-using-minpack-as-cmake-package:
     runs-on: ubuntu-latest
     strategy:
       matrix:
