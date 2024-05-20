@@ -1,8 +1,6 @@
 #ifndef __MINPACKEX_H__
 #define __MINPACKEX_H__
 
-#include <minpack.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

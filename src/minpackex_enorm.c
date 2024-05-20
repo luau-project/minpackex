@@ -1,3 +1,4 @@
+#include <minpack.h>
 #include "minpackex.h"
 
 MINPACKEX_API
