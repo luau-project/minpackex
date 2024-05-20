@@ -13,7 +13,7 @@ if (DEFINED minpack_INCLUDE_DIR AND DEFINED minpack_LIBRARY_DIR)
         REQUIRED
     )
     
-    get_filename_component(__minpack_prefix "${MINPACK_INCLUDE_DIRS}" PATH)
+    get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
 
     find_path(minpack_RUNTIME_DIR
         NAMES minpack.dll libminpack.dll
@@ -43,7 +43,7 @@ elseif(DEFINED minpack_DIR)
         REQUIRED
     )
 
-    get_filename_component(__minpack_prefix "${MINPACK_INCLUDE_DIRS}" PATH)
+    get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
 
     find_path(minpack_RUNTIME_DIR
         NAMES minpack.dll libminpack.dll
@@ -68,7 +68,7 @@ else()
             REQUIRED
         )
 
-        get_filename_component(__minpack_prefix "${MINPACK_INCLUDE_DIRS}" PATH)
+        get_filename_component(__minpack_prefix "${minpack_INCLUDE_DIRS}" PATH)
 
         find_path(minpack_RUNTIME_DIR
             NAMES minpack.dll libminpack.dll
