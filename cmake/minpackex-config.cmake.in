@@ -94,26 +94,33 @@ find_path(
     NO_DEFAULT_PATH
 )
 
-find_package(minpack)
-
 set(minpackex_LIBRARIES ${minpackex_LIBRARY})
 set(minpackex_INCLUDE_DIRS ${minpackex_INCLUDE_DIR})
 
 mark_as_advanced(minpackex_LIBRARY)
 
-if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR AND minpack_FOUND)
+if (DEFINED minpackex_LIBRARY AND DEFINED minpackex_INCLUDE_DIR)
     set(minpackex_FOUND TRUE)
     set(minpackex_LIBRARY_DIR "${_prefix}/@MINPACKEX_INSTALL_LIBDIR@")
     set(minpackex_INSTALL_PREFIX ${_prefix})
     set(minpackex_ROOT_DIR ${_prefix})
 
-    foreach(__minpack_lib ${minpack_LIBRARIES})
-        list(APPEND minpackex_LIBRARIES "${__minpack_lib}")
-    endforeach()
+    find_package(minpack)
 
-    foreach(__minpack_incdir ${minpack_INCLUDE_DIRS})
-        list(APPEND minpackex_INCLUDE_DIRS "${__minpack_incdir}")
-    endforeach()
+    if (minpack_FOUND)
+        foreach(__minpack_lib ${minpack_LIBRARIES})
+            list(APPEND minpackex_LIBRARIES "${__minpack_lib}")
+        endforeach()
+
+        foreach(__minpack_incdir ${minpack_INCLUDE_DIRS})
+            list(APPEND minpackex_INCLUDE_DIRS "${__minpack_incdir}")
+        endforeach()
+    else()
+        # assume minpack is a system library
+        # which was built as a shared library,
+        # installed at minpackex's directory tree
+        list(APPEND minpackex_LIBRARIES "minpack")
+    endif()
 endif()
 
 if (DEFINED minpackex_LIBRARY AND EXISTS "${_prefix}/@MINPACKEX_INSTALL_LIBDIR@/@MINPACKEX_LIBRARY_NAME@-@PROJECT_VERSION@/@MINPACKEX_LIBRARY_NAME@-targets.cmake")
