@@ -105,3 +105,77 @@ jobs:
 
       - name: Install minpackex
         run: cmake --install $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
+  build-using-minpack-as-system-library:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_DOWNLOAD: ['OFF']
+        CMAKE_BUILD_TYPE: ['Release', 'Debug']
+        BUILD_SHARED_LIBS: ['ON', 'OFF']
+        BUILD_STATIC_LIBS: ['ON', 'OFF']
+        BUILD_TESTS: ['ON', 'OFF']
+        TOOLCHAIN:
+          - {COMPILER: gcc, VERSION: 13}
+          - {COMPILER: intel, VERSION: '2024.1'}
+          - {COMPILER: intel-classic, VERSION: '2021.10'}
+          - {COMPILER: nvidia-hpc, VERSION: '23.11'}
+          - {COMPILER: 'llvm-flang-new', VERSION: '18'}
+        
+        exclude:
+          
+          - BUILD_SHARED_LIBS: 'OFF'
+            BUILD_STATIC_LIBS: 'OFF'
+          
+          - CMAKE_BUILD_TYPE: 'Debug'
+            TOOLCHAIN: {COMPILER: nvidia-hpc, VERSION: '23.11'}
+
+    steps:
+
+      - name: Install minpack
+        run: sudo apt install -y minpack-dev
+
+      - name: Setup both compilers for C and Fortran
+        if: ${{ matrix.TOOLCHAIN.COMPILER!='llvm-flang-new' }}
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.TOOLCHAIN.COMPILER }}
+          version: ${{ matrix.TOOLCHAIN.VERSION }}
+      
+      - name: Setup LLVM Flang-new (Fortran) and Clang (C) compilers
+        if: ${{ matrix.TOOLCHAIN.COMPILER=='llvm-flang-new' }}
+        run: |
+          codename=$(lsb_release -c -s)
+          echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" > $RUNNER_TEMP/llvm-flang-new.list
+          echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename main" >> $RUNNER_TEMP/llvm-flang-new.list
+          echo "deb http://apt.llvm.org/$codename/ llvm-toolchain-$codename-${{ matrix.TOOLCHAIN.VERSION }} main" >> $RUNNER_TEMP/llvm-flang-new.list
+          echo "deb-src http://apt.llvm.org/$codename/ llvm-toolchain-$codename-${{ matrix.TOOLCHAIN.VERSION }} main" >> $RUNNER_TEMP/llvm-flang-new.list
+          sudo mv $RUNNER_TEMP/llvm-flang-new.list /etc/apt/sources.list.d/
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc  
+          sudo apt update
+          sudo apt install -f -y libllvm-${{ matrix.TOOLCHAIN.VERSION }}-ocaml-dev libllvm${{ matrix.TOOLCHAIN.VERSION }} llvm-${{ matrix.TOOLCHAIN.VERSION }} llvm-${{ matrix.TOOLCHAIN.VERSION }}-dev llvm-${{ matrix.TOOLCHAIN.VERSION }}-doc llvm-${{ matrix.TOOLCHAIN.VERSION }}-examples llvm-${{ matrix.TOOLCHAIN.VERSION }}-runtime clang-${{ matrix.TOOLCHAIN.VERSION }} clang-tools-${{ matrix.TOOLCHAIN.VERSION }} clang-${{ matrix.TOOLCHAIN.VERSION }}-doc libclang-common-${{ matrix.TOOLCHAIN.VERSION }}-dev libclang-${{ matrix.TOOLCHAIN.VERSION }}-dev libclang1-${{ matrix.TOOLCHAIN.VERSION }} clang-format-${{ matrix.TOOLCHAIN.VERSION }} python3-clang-${{ matrix.TOOLCHAIN.VERSION }} clangd-${{ matrix.TOOLCHAIN.VERSION }} clang-tidy-${{ matrix.TOOLCHAIN.VERSION }} libclang-rt-${{ matrix.TOOLCHAIN.VERSION }}-dev libmlir-${{ matrix.TOOLCHAIN.VERSION }}-dev mlir-${{ matrix.TOOLCHAIN.VERSION }}-tools flang-${{ matrix.TOOLCHAIN.VERSION }}
+          echo "CC=clang-${{ matrix.TOOLCHAIN.VERSION }}" >> $GITHUB_ENV
+          echo "FC=flang-new-${{ matrix.TOOLCHAIN.VERSION }}" >> $GITHUB_ENV
+
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set shell variables to build and install directories (minpackex)
+        run: |
+          echo "MINPACKEX_BUILDDIR=$RUNNER_TEMP/minpackex-build" >> $GITHUB_ENV
+          echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
+      
+      - name: Configure the build of minpackex
+        run: cmake -G "Unix Makefiles" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Test minpackex
+        run: ctest --test-dir $MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Install minpackex
+        run: cmake --install $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
