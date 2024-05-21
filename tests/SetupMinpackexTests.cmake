@@ -1,6 +1,6 @@
 
 # test names
-set(MINPACKEX_TEST_NAMES "tlmdif1" "tlmdif" "tlmder1")
+set(MINPACKEX_TEST_NAMES "tlmdif1" "tlmdif" "tlmder1" "tlmder")
 
 function(
     setup_minpackex_tests_for_lib_target
