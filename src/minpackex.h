@@ -35,7 +35,7 @@
 //                                                                                 //
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
-////                                 Body                                          //
+////                                 Body                                        ////
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 //                                                                                 //
@@ -79,6 +79,24 @@ double minpackex_enorm(int n, double *x);
 
 MINPACKEX_API
 double minpackex_dpmpar(int i);
+
+//
+// minpackex_hybrd1
+//
+
+/* callback to minpackex_hybrd1 function */
+
+typedef void (*minpackex_hybrd1_callback)(void *userdata, int n, const double *x, double *fvec, int *iflag);
+
+/* find a zero of a system of N nonlinear functions in N variables by
+   a modification of the Powell hybrid method (Jacobian calculated by
+   a forward-difference approximation) */
+
+void minpackex_hybrd1(
+    void *userdata,
+    minpackex_hybrd1_callback callback,
+    int n, double *x, double *fvec, double tol, int *info,
+    double *wa, int lwa);
 
 //
 // minpackex_lmdif1
