@@ -72,6 +72,7 @@ set(MINPACKEX_SOURCE_FILES
     "src/minpackex_hybrd1.c"
     "src/minpackex_hybrd.c"
     "src/minpackex_hybrj1.c"
+    "src/minpackex_hybrj.c"
     "src/minpackex_lmdif1.c"
     "src/minpackex_lmdif.c"
     "src/minpackex_lmder1.c"

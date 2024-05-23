@@ -1,5 +1,5 @@
-#ifndef __TLMDIF1_MINPACK_H__
-#define  __TLMDIF1_MINPACK_H__
+#ifndef __TLMDIF_MINPACK_H__
+#define  __TLMDIF_MINPACK_H__
 
 #include <stdio.h>
 
