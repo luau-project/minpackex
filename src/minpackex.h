@@ -92,6 +92,7 @@ typedef void (*minpackex_hybrd1_callback)(void *userdata, int n, const double *x
    a modification of the Powell hybrid method (Jacobian calculated by
    a forward-difference approximation) */
 
+MINPACKEX_API
 void minpackex_hybrd1(
     void *userdata,
     minpackex_hybrd1_callback callback,
@@ -110,6 +111,7 @@ typedef void (*minpackex_hybrd_callback)(void *userdata, int n, const double *x,
    a modification of the Powell hybrid method (Jacobian calculated by
    a forward-difference approximation, more general). */
 
+MINPACKEX_API
 void minpackex_hybrd(
     void *userdata,
     minpackex_hybrd_callback callback,
