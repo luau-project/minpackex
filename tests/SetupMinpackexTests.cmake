@@ -9,7 +9,7 @@ function(
     )
 
     # test names
-    set(MINPACKEX_TEST_NAMES "tchkder" "thybrd" "thybrd1" "thybrj" "thybrj1" "tlmder" "tlmder1" "tlmdif" "tlmdif1")
+    set(MINPACKEX_TEST_NAMES "tchkder" "tenorm" "thybrd" "thybrd1" "thybrj" "thybrj1" "tlmder" "tlmder1" "tlmdif" "tlmdif1")
     
     foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
         set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}-${target_kind}")
