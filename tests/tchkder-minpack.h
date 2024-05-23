@@ -1,5 +1,5 @@
-#ifndef __THYBRJ1_MINPACK_H__
-#define  __THYBRJ1_MINPACK_H__
+#ifndef __TCHKDER_MINPACK_H__
+#define  __TCHKDER_MINPACK_H__
 
 #include <stdio.h>
 
