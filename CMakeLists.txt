@@ -67,6 +67,7 @@ set(MINPACKEX_LIBRARY_NAME "minpackex")
 
 # source files
 set(MINPACKEX_SOURCE_FILES
+    "src/minpackex_chkder.c"
     "src/minpackex_dpmpar.c"
     "src/minpackex_enorm.c"
     "src/minpackex_hybrd1.c"

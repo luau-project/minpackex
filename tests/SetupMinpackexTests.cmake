@@ -9,7 +9,7 @@ function(
     )
 
     # test names
-    set(MINPACKEX_TEST_NAMES "thybrd1" "thybrd" "thybrj1" "thybrj" "tlmdif1" "tlmdif" "tlmder1" "tlmder")
+    set(MINPACKEX_TEST_NAMES "tchkder" "thybrd" "thybrd1" "thybrj" "thybrj1" "tlmder" "tlmder1" "tlmdif" "tlmdif1")
     
     foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
         set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}-${target_kind}")
@@ -32,7 +32,7 @@ function(
                     add_custom_command(
                         TARGET ${MINPACKEX_LIB_TEST_NAME}
                         POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy -t ${CMAKE_CURRENT_BINARY_DIR} ${__minpack_dll}
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${__minpack_dll} ${CMAKE_CURRENT_BINARY_DIR}
                     )
                 else()
                     message(WARNING "Unable to find a DLL for minpack. Tests may fail if the dll directory is not on your system environment PATH variable.")

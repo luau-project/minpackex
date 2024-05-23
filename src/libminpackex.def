@@ -1,12 +1,13 @@
 LIBRARY "libminpackex.dll"
 EXPORTS
-minpackex_enorm
+minpackex_chkder
 minpackex_dpmpar
-minpackex_hybrd1
+minpackex_enorm
 minpackex_hybrd
-minpackex_hybrj1
+minpackex_hybrd1
 minpackex_hybrj
-minpackex_lmdif1
-minpackex_lmdif
-minpackex_lmder1
+minpackex_hybrj1
 minpackex_lmder
+minpackex_lmder1
+minpackex_lmdif
+minpackex_lmdif1

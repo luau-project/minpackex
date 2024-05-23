@@ -67,11 +67,13 @@ extern "C" {
 #define MINPACKEX_VERSION "0.1.0"
 
 //
-// minpackex_enorm
+// minpackex_chkder
 //
 
 MINPACKEX_API
-double minpackex_enorm(int n, double *x);
+void minpackex_chkder(int m, int n, const double *x, double *fvec, double *fjac,
+    int ldfjac, double *xp, double *fvecp, int mode,
+    double *err);
 
 //
 // minpackex_dpmpar
@@ -81,23 +83,11 @@ MINPACKEX_API
 double minpackex_dpmpar(int i);
 
 //
-// minpackex_hybrd1
+// minpackex_enorm
 //
 
-/* callback to minpackex_hybrd1 function */
-
-typedef void (*minpackex_hybrd1_callback)(void *userdata, int n, const double *x, double *fvec, int *iflag);
-
-/* find a zero of a system of N nonlinear functions in N variables by
-   a modification of the Powell hybrid method (Jacobian calculated by
-   a forward-difference approximation) */
-
 MINPACKEX_API
-void minpackex_hybrd1(
-    void *userdata,
-    minpackex_hybrd1_callback callback,
-    int n, double *x, double *fvec, double tol, int *info,
-    double *wa, int lwa);
+double minpackex_enorm(int n, double *x);
 
 //
 // minpackex_hybrd
@@ -122,22 +112,23 @@ void minpackex_hybrd(
     double *wa1, double *wa2, double *wa3, double *wa4);
 
 //
-// minpackex_hybrj1
+// minpackex_hybrd1
 //
 
-/* callback to minpackex_hybrj1 function */
+/* callback to minpackex_hybrd1 function */
 
-typedef void (*minpackex_hybrj1_callback)(void *userdata, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
+typedef void (*minpackex_hybrd1_callback)(void *userdata, int n, const double *x, double *fvec, int *iflag);
 
 /* find a zero of a system of N nonlinear functions in N variables by
-   a modification of the Powell hybrid method (user-supplied Jacobian) */
+   a modification of the Powell hybrid method (Jacobian calculated by
+   a forward-difference approximation) */
 
 MINPACKEX_API
-void minpackex_hybrj1(
+void minpackex_hybrd1(
     void *userdata,
-    minpackex_hybrj1_callback callback,
-    int n, double *x, double *fvec, double *fjac, int ldfjac, double tol,
-    int *info, double *wa, int lwa);
+    minpackex_hybrd1_callback callback,
+    int n, double *x, double *fvec, double tol, int *info,
+    double *wa, int lwa);
 
 //
 // minpackex_hybrj
@@ -162,24 +153,66 @@ void minpackex_hybrj(
     double *wa3, double *wa4);
 
 //
-// minpackex_lmdif1
+// minpackex_hybrj1
 //
 
-/* callback to minpackex_lmdif1 function */
+/* callback to minpackex_hybrj1 function */
 
-typedef void (*minpackex_lmdif1_callback)(void *userdata, int m, int n, const double *x, double *fvec, int *iflag);
+typedef void (*minpackex_hybrj1_callback)(void *userdata, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
+
+/* find a zero of a system of N nonlinear functions in N variables by
+   a modification of the Powell hybrid method (user-supplied Jacobian) */
+
+MINPACKEX_API
+void minpackex_hybrj1(
+    void *userdata,
+    minpackex_hybrj1_callback callback,
+    int n, double *x, double *fvec, double *fjac, int ldfjac, double tol,
+    int *info, double *wa, int lwa);
+
+//
+// minpackex_lmder
+//
+
+/* callback to minpackex_lmder function */
+
+typedef void (*minpackex_lmder_callback)(void *userdata, int m, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
 
 /* minimize the sum of the squares of nonlinear functions in N
    variables by a modification of the Levenberg-Marquardt algorithm
-   (Jacobian calculated by a forward-difference approximation) */
+   (user-supplied Jacobian, more general) */
 
 MINPACKEX_API
-void minpackex_lmdif1(
+void minpackex_lmder(
     void *userdata,
-    minpackex_lmdif1_callback callback,
-    int m, int n, double *x, double *fvec, double tol,
-    int *info, int *iwa, double *wa, int lwa);
+    minpackex_lmder_callback callback,
+    int m, int n, double *x, double *fvec,
+    double *fjac, int ldfjac, double ftol,
+    double xtol, double gtol, int maxfev,
+    double *diag, int mode, double factor, int nprint,
+    int *info, int *nfev, int *njev, int *ipvt, double *qtf,
+    double *wa1, double *wa2, double *wa3,
+    double *wa4);
 
+//
+// minpackex_lmder1
+//
+
+/* callback to minpackex_lmder1 function */
+
+typedef void (*minpackex_lmder1_callback)(void *userdata, int m, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
+
+/* minimize the sum of the squares of nonlinear functions in N
+   variables by a modification of the Levenberg-Marquardt algorithm
+   (user-supplied Jacobian) */
+
+MINPACKEX_API
+void minpackex_lmder1(
+    void *userdata,
+    minpackex_lmder1_callback callback,
+    int m, int n, double *x, double *fvec,
+    double *fjac, int ldfjac, double tol,
+    int *info, int *ipvt, double *wa, int lwa);
 
 //
 // minpackex_lmdif
@@ -206,48 +239,23 @@ void minpackex_lmdif(
     double *wa4 );
 
 //
-// minpackex_lmder1
+// minpackex_lmdif1
 //
 
-/* callback to minpackex_lmder1 function */
+/* callback to minpackex_lmdif1 function */
 
-typedef void (*minpackex_lmder1_callback)(void *userdata, int m, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
+typedef void (*minpackex_lmdif1_callback)(void *userdata, int m, int n, const double *x, double *fvec, int *iflag);
 
 /* minimize the sum of the squares of nonlinear functions in N
    variables by a modification of the Levenberg-Marquardt algorithm
-   (user-supplied Jacobian) */
+   (Jacobian calculated by a forward-difference approximation) */
 
 MINPACKEX_API
-void minpackex_lmder1(
+void minpackex_lmdif1(
     void *userdata,
-    minpackex_lmder1_callback callback,
-    int m, int n, double *x, double *fvec,
-    double *fjac, int ldfjac, double tol,
-    int *info, int *ipvt, double *wa, int lwa);
-
-//
-// minpackex_lmder
-//
-
-/* callback to minpackex_lmder function */
-
-typedef void (*minpackex_lmder_callback)(void *userdata, int m, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
-
-/* minimize the sum of the squares of nonlinear functions in N
-   variables by a modification of the Levenberg-Marquardt algorithm
-   (user-supplied Jacobian, more general) */
-
-MINPACKEX_API
-void minpackex_lmder(
-    void *userdata,
-    minpackex_lmder_callback callback,
-    int m, int n, double *x, double *fvec,
-    double *fjac, int ldfjac, double ftol,
-    double xtol, double gtol, int maxfev,
-    double *diag, int mode, double factor, int nprint,
-    int *info, int *nfev, int *njev, int *ipvt, double *qtf,
-    double *wa1, double *wa2, double *wa3,
-    double *wa4);
+    minpackex_lmdif1_callback callback,
+    int m, int n, double *x, double *fvec, double tol,
+    int *info, int *iwa, double *wa, int lwa);
 
 #ifdef __cplusplus
 }
