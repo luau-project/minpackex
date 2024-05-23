@@ -35,7 +35,6 @@ void minpack_lmdif_fcn(int *m, int *n, double *x, double *fvec, int *iflag)
             tmp3 = tmp2;
         fvec[i - 1] = y[i - 1] - (x[1 - 1] + tmp1 / (x[2 - 1] * tmp2 + x[3 - 1] * tmp3));
     }
-    return;
 }
 
 void tlmdif_minpack_write_content(FILE *file)
@@ -85,5 +84,4 @@ void tlmdif_minpack_write_content(FILE *file)
     for (j = 1; j <= n; j++)
         fprintf(file, "%s%15.7g", j % 3 == 1 ? "\n     " : "", x[j - 1]);
     fprintf(file, "\n");
-    return;
 }

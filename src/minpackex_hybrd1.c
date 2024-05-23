@@ -64,5 +64,8 @@ void minpackex_hybrd1(
     n_param.userdata = userdata;
     n_param.callback = (void *)callback;
 
-    hybrd1_(__minpack_hybrd1_callback, (int *)(&n_param), x, fvec, &tol, info, wa, &lwa);
+    hybrd1_(
+        &__minpack_hybrd1_callback,
+        (int *)(&n_param), x, fvec, &tol,
+        info, wa, &lwa);
 }

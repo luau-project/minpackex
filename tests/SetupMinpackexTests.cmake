@@ -1,7 +1,3 @@
-
-# test names
-set(MINPACKEX_TEST_NAMES "thybrd1" "thybrd" "tlmdif1" "tlmdif" "tlmder1" "tlmder")
-
 function(
     setup_minpackex_tests_for_lib_target
     minpackex_lib_target
@@ -11,6 +7,9 @@ function(
     minpack_inc_dirs
     minpack_libs
     )
+
+    # test names
+    set(MINPACKEX_TEST_NAMES "thybrd1" "thybrd" "thybrj1" "tlmdif1" "tlmdif" "tlmder1" "tlmder")
     
     foreach (MINPACKEX_TEST_NAME ${MINPACKEX_TEST_NAMES})
         set(MINPACKEX_LIB_TEST_NAME "${MINPACKEX_TEST_NAME}-${target_kind}")

@@ -66,5 +66,9 @@ void minpackex_lmder1(
     m_param.userdata = userdata;
     m_param.callback = (void *)callback;
 
-    lmder1_(__minpack_lmder1_callback, (int *)(&m_param), &n, x, fvec, fjac, &ldfjac, &tol, info, ipvt, wa, &lwa);
+    lmder1_(
+        &__minpack_lmder1_callback,
+        (int *)(&m_param), &n, x, fvec,
+        fjac, &ldfjac, &tol,
+        info, ipvt, wa, &lwa);
 }

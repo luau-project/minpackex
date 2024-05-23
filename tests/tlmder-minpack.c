@@ -55,7 +55,6 @@ void minpack_lmder_fcn(int *m, int *n, double *x, double *fvec, double *fjac, in
             fjac[i - 1 + *ldfjac * (3 - 1)] = tmp1 * tmp3 / tmp4;
         };
     }
-    return;
 }
 
 void tlmder_minpack_write_content(FILE *file)

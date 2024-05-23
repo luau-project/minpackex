@@ -30,7 +30,6 @@ void minpackex_hybrd1_fcn(void *userdata, int n, const double *x, double *fvec, 
             temp2 = x[k + 1 - 1];
         fvec[k - 1] = temp - temp1 - two * temp2 + one;
     }
-    return;
 }
 
 void thybrd1_minpackex_write_content(FILE *file)

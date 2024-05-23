@@ -45,33 +45,27 @@
 #include "minpackex.h"
 #include "minpackex_param.h"
 
-static void __minpack_hybrd_callback(int *n, double *x, double *fvec, int *iflag)
+static void __minpack_hybrj1_callback(int *n, double *x, double *fvec, double *fjac, int *ldfjac, int *iflag)
 {
     ModifiedIntParam *modifiedN = (ModifiedIntParam *)(void *)n;
-    minpackex_hybrd_callback userCallback = (minpackex_hybrd_callback)(modifiedN->callback);
-    userCallback(modifiedN->userdata, modifiedN->param, x, fvec, iflag);
+    minpackex_hybrj1_callback userCallback = (minpackex_hybrj1_callback)(modifiedN->callback);
+    userCallback(modifiedN->userdata, modifiedN->param, x, fvec, fjac, *ldfjac, iflag);
 }
 
 MINPACKEX_API
-void minpackex_hybrd(
+void minpackex_hybrj1(
     void *userdata,
-    minpackex_hybrd_callback callback,
-    int n, double *x, double *fvec, double xtol, int maxfev,
-    int ml, int mu, double epsfcn, double *diag, int mode,
-    double factor, int nprint, int *info, int *nfev,
-    double *fjac, int ldfjac, double *r, int lr, double *qtf,
-    double *wa1, double *wa2, double *wa3, double *wa4)
+    minpackex_hybrj1_callback callback,
+    int n, double *x, double *fvec, double *fjac, int ldfjac, double tol,
+    int *info, double *wa, int lwa)
 {
     ModifiedIntParam n_param;
     n_param.param = n;
     n_param.userdata = userdata;
     n_param.callback = (void *)callback;
 
-    hybrd_(
-        &__minpack_hybrd_callback,
-        (int *)(&n_param), x, fvec, &xtol, &maxfev,
-        &ml, &mu, &epsfcn, diag, &mode,
-        &factor, &nprint, info, nfev,
-        fjac, &ldfjac, r, &lr, qtf,
-        wa1, wa2, wa3, wa4);
+    hybrj1_(
+        &__minpack_hybrj1_callback,
+        (int *)(&n_param), x, fvec, fjac, &ldfjac, &tol,
+        info, wa, &lwa);
 }

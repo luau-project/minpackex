@@ -64,5 +64,8 @@ void minpackex_lmdif1(
     m_param.userdata = userdata;
     m_param.callback = (void *)callback;
 
-    lmdif1_(__minpack_lmdif1_callback, (int *)(&m_param), &n, x, fvec, &tol, info, iwa, wa, &lwa);
+    lmdif1_(
+        &__minpack_lmdif1_callback,
+        (int *)(&m_param), &n, x, fvec, &tol,
+        info, iwa, wa, &lwa);
 }

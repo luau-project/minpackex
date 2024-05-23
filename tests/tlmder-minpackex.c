@@ -55,7 +55,6 @@ void minpackex_lmder_fcn(void *userdata, int m, int n, const double *x, double *
             fjac[i - 1 + ldfjac * (3 - 1)] = tmp1 * tmp3 / tmp4;
         };
     }
-    return;
 }
 
 void tlmder_minpackex_write_content(FILE *file)

@@ -36,7 +36,6 @@ void minpack_hybrd_fcn(int *n, double *x, double *fvec, int *iflag)
             temp2 = x[k + 1 - 1];
         fvec[k - 1] = temp - temp1 - two * temp2 + one;
     }
-    return;
 }
 
 void thybrd_minpack_write_content(FILE *file)

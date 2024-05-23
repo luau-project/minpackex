@@ -122,6 +122,25 @@ void minpackex_hybrd(
     double *wa1, double *wa2, double *wa3, double *wa4);
 
 //
+// minpackex_hybrj1
+//
+
+/* callback to minpackex_hybrj1 function */
+
+typedef void (*minpackex_hybrj1_callback)(void *userdata, int n, const double *x, double *fvec, double *fjac, int ldfjac, int *iflag);
+
+/* find a zero of a system of N nonlinear functions in N variables by
+   a modification of the Powell hybrid method (Jacobian calculated by
+   a forward-difference approximation) */
+
+MINPACKEX_API
+void minpackex_hybrj1(
+    void *userdata,
+    minpackex_hybrj1_callback callback,
+    int n, double *x, double *fvec, double *fjac, int ldfjac, double tol,
+    int *info, double *wa, int lwa);
+
+//
 // minpackex_lmdif1
 //
 

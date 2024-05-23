@@ -70,7 +70,7 @@ void minpackex_lmdif(
     m_param.callback = (void *)callback;
 
     lmdif_(
-        __minpack_lmdif_callback,
+        &__minpack_lmdif_callback,
         (int *)(&m_param), &n, x, fvec, &ftol,
         &xtol, &gtol, &maxfev, &epsfcn,
         diag, &mode, &factor, &nprint,

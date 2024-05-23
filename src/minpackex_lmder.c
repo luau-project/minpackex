@@ -71,7 +71,7 @@ void minpackex_lmder(
     m_param.callback = (void *)callback;
 
     lmder_(
-        __minpack_lmder_callback,
+        &__minpack_lmder_callback,
         (int *)(&m_param), &n, x, fvec,
         fjac, &ldfjac, &ftol,
         &xtol, &gtol, &maxfev,
