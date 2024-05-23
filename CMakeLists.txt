@@ -70,6 +70,7 @@ set(MINPACKEX_SOURCE_FILES
     "src/minpackex_dpmpar.c"
     "src/minpackex_enorm.c"
     "src/minpackex_hybrd1.c"
+    "src/minpackex_hybrd.c"
     "src/minpackex_lmdif1.c"
     "src/minpackex_lmdif.c"
     "src/minpackex_lmder1.c"

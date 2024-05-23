@@ -2,8 +2,9 @@ LIBRARY "minpackex.dll"
 EXPORTS
 minpackex_enorm
 minpackex_dpmpar
+minpackex_hybrd1
+minpackex_hybrd
 minpackex_lmdif1
 minpackex_lmdif
 minpackex_lmder1
 minpackex_lmder
-minpackex_hybrd1
