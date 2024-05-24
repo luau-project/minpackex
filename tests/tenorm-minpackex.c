@@ -7,7 +7,7 @@
 
 void tenorm_minpackex_write_content(FILE *file)
 {
-    int j, n;
+    int n;
     double tol, vec_norm, expected_norm, dist;
     double x[2] = {3.0, 4.0};
     int one = 1;
@@ -27,6 +27,7 @@ void tenorm_minpackex_write_content(FILE *file)
 
     fprintf(file, "      l2 norm of the vector%15.7g\n\n", vec_norm);
     fprintf(file, "      expected norm%15.7g\n\n", expected_norm);
-    fprintf(file, "      final distance of l2 norm of the vector and expected norm%15.7g\n\n", dist);
+    fprintf(file, "      distance between l2 norm of the vector and expected norm%15.7g\n\n", dist);
+    fprintf(file, "      tolerance%15.7g\n\n", tol);
     fprintf(file, "\n");
 }

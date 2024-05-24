@@ -67,23 +67,25 @@ set(MINPACKEX_LIBRARY_NAME "minpackex")
 
 # source files
 set(MINPACKEX_SOURCE_FILES
-    "src/minpackex_chkder.c"
-    "src/minpackex_dpmpar.c"
-    "src/minpackex_enorm.c"
-    "src/minpackex_hybrd.c"
-    "src/minpackex_hybrd1.c"
-    "src/minpackex_hybrj.c"
-    "src/minpackex_hybrj1.c"
-    "src/minpackex_lmdif.c"
-    "src/minpackex_lmdif1.c"
-    "src/minpackex_lmder.c"
-    "src/minpackex_lmder1.c"
-    "src/minpackex_lmstr.c"
-    "src/minpackex_lmstr1.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_chkder.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_dpmpar.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_enorm.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_hybrd.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_hybrd1.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_hybrj.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_hybrj1.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmdif.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmdif1.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmder.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmder1.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmstr.c"
+    "src/${MINPACKEX_LIBRARY_NAME}_lmstr1.c"
 )
 
+set(MINPACKEX_EXPORT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_LIBRARY_NAME}_export.h")
+
 # installable header files
-set(MINPACKEX_HEADER_FILES "src/minpackex.h" "${CMAKE_CURRENT_BINARY_DIR}/minpackex_export.h")
+set(MINPACKEX_HEADER_FILES "src/${MINPACKEX_LIBRARY_NAME}.h" ${MINPACKEX_EXPORT_HEADER})
 
 # license files
 set(MINPACKEX_LICENSE_FILES "LICENSE.md")
@@ -92,9 +94,9 @@ if (WIN32)
     # def file required to generate import file (.lib) to link shared libraries
     # with Intel C compiler
     if (MSVC OR "${CMAKE_C_SIMULATE_ID}" MATCHES "MSVC")
-        set(MINPACKEX_DEF_FILE "src/minpackex.def")
+        set(MINPACKEX_DEF_FILE "src/${MINPACKEX_LIBRARY_NAME}.def")
     else()
-        set(MINPACKEX_DEF_FILE "src/libminpackex.def")
+        set(MINPACKEX_DEF_FILE "src/lib${MINPACKEX_LIBRARY_NAME}.def")
     endif()
 endif()
 
@@ -279,6 +281,28 @@ configure_file(
     ${minpackex_config_version_cmake_in}
     ${minpackex_config_version_cmake} @ONLY
 )
+
+# At the moment of writing, on Windows,
+# the generated minpackex_export.h header file
+# uses __declspec(dllexport) to export functions on shared libraries,
+# and __declspec(dllimport) to use such exported functions.
+# Below, especially eyeing GCC and Clang from MSYS2,
+# we replace __declspec(dllexport) with __attribute__((visibility("default"))),
+# and we also erase __declspec(dllimport) to the empty string.
+# We do this "hack" here to have both shared and static libraries built,
+# not posing any compiler definition (-D<>) for the library user.
+# Doing so also ease tests execution on C.I for such compilers.
+# Be aware that, for now, any custom-compiled
+# gcc/g++ (winlibs's gcc, for instance)
+# should trigger the conditional below,
+# even though winlibs's gcc was not tested.
+
+if (WIN32 AND (CYGWIN OR MINGW OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
+    file(READ "${MINPACKEX_EXPORT_HEADER}" __MINPACKEX_EXPORT_HEADER_CONTENT)
+    string(REPLACE "__declspec(dllexport)" "__attribute__((visibility(\"default\")))" __DLL_EXPORT_REPLACED "${__MINPACKEX_EXPORT_HEADER_CONTENT}")
+    string(REPLACE "__declspec(dllimport)" "" __DLL_IMPORT_REPLACED "${__DLL_EXPORT_REPLACED}")
+    file(WRITE "${MINPACKEX_EXPORT_HEADER}" "${__DLL_IMPORT_REPLACED}")
+endif()
 
 configure_file(${MINPACKEX_PKGCONFIG_INPUT} ${MINPACKEX_PKGCONFIG} @ONLY)
 install(FILES ${MINPACKEX_PKGCONFIG} DESTINATION "${MINPACKEX_INSTALL_PKGCONFIGDIR}")
