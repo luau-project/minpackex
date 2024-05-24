@@ -59,9 +59,9 @@ void tlmstr1_minpackex_write_content(FILE *file)
 
     /*     the following starting values provide a rough fit. */
 
-    x[1] = 1.;
-    x[2] = 1.;
-    x[3] = 1.;
+    x[1 - 1] = 1.;
+    x[2 - 1] = 1.;
+    x[3 - 1] = 1.;
 
     ldfjac = 3;
     lwa = 30;
