@@ -21,6 +21,7 @@ function(
         "tlmder1"
         "tlmdif"
         "tlmdif1"
+        "tlmstr"
         "tlmstr1"
     )
     
