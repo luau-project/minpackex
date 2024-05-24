@@ -83,7 +83,7 @@ set(MINPACKEX_SOURCE_FILES
 )
 
 # installable header files
-set(MINPACKEX_HEADER_FILES "src/minpackex.h")
+set(MINPACKEX_HEADER_FILES "src/minpackex.h" "${CMAKE_CURRENT_BINARY_DIR}/minpackex_export.h")
 
 # license files
 set(MINPACKEX_LICENSE_FILES "LICENSE.md")
@@ -97,15 +97,6 @@ if (WIN32)
         set(MINPACKEX_DEF_FILE "src/libminpackex.def")
     endif()
 endif()
-
-# checking compiler capabilities
-include(CheckCSourceCompiles)
-
-CHECK_C_SOURCE_COMPILES([[
-    extern __attribute__ ((visibility ("default"))) int f(void);
-    int main(void) { return f(); }
-    int f(void) { return 1; }
-]] HAVE_VISIBILITY)
 
 # use GNU directory conventions
 include(GNUInstallDirs)
@@ -189,6 +180,9 @@ if (BUILD_TESTING)
     include(cmake/SetupMinpackexTests.cmake)
 endif()
 
+# generate minpackex_export.h
+include(GenerateExportHeader)
+
 # build the shared library
 if (BUILD_SHARED_LIBS)
     set(MINPACKEX_SHARED_LIB "minpackex_SHARED")
@@ -196,21 +190,13 @@ if (BUILD_SHARED_LIBS)
     add_library(${MINPACKEX_SHARED_LIB} SHARED "")
     target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_SOURCE_FILES})
 
+    generate_export_header(${MINPACKEX_SHARED_LIB} BASE_NAME ${MINPACKEX_LIBRARY_NAME})
+
     if (WIN32)
         target_sources(${MINPACKEX_SHARED_LIB} PRIVATE ${MINPACKEX_DEF_FILE})
     endif()
 
-    target_include_directories(${MINPACKEX_SHARED_LIB} PRIVATE ${minpack_INCLUDE_DIRS} src)
-    target_compile_definitions(${MINPACKEX_SHARED_LIB} PRIVATE "BUILDING_SHARED=1" "BUILDING_LIBMINPACKEX=1")
-
-    if (HAVE_VISIBILITY)
-        target_compile_definitions(${MINPACKEX_SHARED_LIB} PRIVATE "HAVE_VISIBILITY=1")
-    endif()
-
-    if (MSVC)
-        target_compile_definitions(${MINPACKEX_SHARED_LIB} PRIVATE "DLL_EXPORT")
-    endif()
-
+    target_include_directories(${MINPACKEX_SHARED_LIB} PRIVATE ${minpack_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} src)
     target_link_libraries(${MINPACKEX_SHARED_LIB} PRIVATE ${minpack_LIBRARIES})
 
     set_target_properties(${MINPACKEX_SHARED_LIB}
@@ -243,8 +229,15 @@ if (BUILD_STATIC_LIBS)
 
     add_library(${MINPACKEX_STATIC_LIB} STATIC "")
     target_sources(${MINPACKEX_STATIC_LIB} PRIVATE ${MINPACKEX_SOURCE_FILES})
-    target_include_directories(${MINPACKEX_STATIC_LIB} PRIVATE ${minpack_INCLUDE_DIRS} src)
-    target_compile_definitions(${MINPACKEX_STATIC_LIB} PRIVATE "BUILDING_LIBMINPACKEX=1")
+
+    if (BUILD_SHARED_LIBS)
+        # needed by minpackex_export.h
+        target_compile_definitions(${MINPACKEX_STATIC_LIB} PRIVATE "MINPACKEX_STATIC_DEFINE")
+    else()
+        generate_export_header(${MINPACKEX_STATIC_LIB} BASE_NAME ${MINPACKEX_LIBRARY_NAME})
+    endif()
+
+    target_include_directories(${MINPACKEX_STATIC_LIB} PRIVATE ${minpack_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} src)
     target_link_libraries(${MINPACKEX_STATIC_LIB} PRIVATE ${minpack_LIBRARIES})
 
     set_target_properties(${MINPACKEX_STATIC_LIB}

@@ -54,7 +54,7 @@ function(
             endif()
         endif()
 
-        target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src tests "${minpack_inc_dirs}")
+        target_include_directories(${MINPACKEX_LIB_TEST_NAME} PRIVATE src ${CMAKE_CURRENT_BINARY_DIR} tests "${minpack_inc_dirs}")
         target_link_libraries(${MINPACKEX_LIB_TEST_NAME} PRIVATE ${minpackex_lib_target} "${minpack_libs}")
 
         if (UNIX)
