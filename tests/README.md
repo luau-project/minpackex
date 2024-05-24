@@ -1,5 +1,7 @@
 # minpackex
 
+Welcome to the tests of ```minpackex```.
+
 ## Table of Contents
 * [Description](#description)
 * [Tests](#tests)

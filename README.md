@@ -1,5 +1,7 @@
 # minpackex
 
+An extension to MINPACK-1 library.
+
 ## Description
 
 This software is an extension to the popular double-precision version of [MINPACK-1](https://www.netlib.org/minpack) library, which provides routines to solve a system of nonlinear equations and nonlinear least squares problems. Without any modification to the source code of [MINPACK-1](https://www.netlib.org/minpack) library, the goal of *minpackex* is to provide an easier-to-use API to the programmer, allowing user data to be shared across function calls.
