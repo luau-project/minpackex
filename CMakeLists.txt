@@ -78,6 +78,7 @@ set(MINPACKEX_SOURCE_FILES
     "src/minpackex_lmdif.c"
     "src/minpackex_lmder1.c"
     "src/minpackex_lmder.c"
+    "src/minpackex_lmstr1.c"
 )
 
 # installable header files
@@ -184,7 +185,7 @@ include(cmake/FindMinpack.cmake)
 enable_testing()
 
 if (BUILD_TESTING)
-    include(tests/SetupMinpackexTests.cmake)
+    include(cmake/SetupMinpackexTests.cmake)
 endif()
 
 # build the shared library
