@@ -1,6 +1,12 @@
 name: minpackex on Ubuntu
 run-name: minpack (multiple Fortran compilers), minpackex (multiple C compilers) on Ubuntu
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - "doc*"
+  pull_request:
+    branches-ignore:
+      - "doc*"
 
 jobs:
   build-using-minpack-as-cmake-package:

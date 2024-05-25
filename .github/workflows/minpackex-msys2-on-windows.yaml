@@ -1,6 +1,12 @@
 name: minpackex with MSYS2 toolchain on Windows
 run-name: minpack (GFortran, LLVM Flang-new GCC-like), minpackex (GCC, Clang) on Windows
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - "doc*"
+  pull_request:
+    branches-ignore:
+      - "doc*"
 
 jobs:
   build-using-minpack-as-cmake-package:
