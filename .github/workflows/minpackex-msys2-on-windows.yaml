@@ -56,7 +56,10 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
-          [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object { $mirror = (Get-Content $env:RUNNER_TEMP\mirrors.list)[(Get-Random -Maximum 10)]; Invoke-WebRequest -Uri "$mirror$_" -OutFile C:\msys64\tmp\$_; }
+          $number_of_lines = (Get-Content $env:RUNNER_TEMP\mirrors.list | Measure-Object -Line).Lines
+          $max_mirror = [int](10, $number_of_lines | Measure-Object -Minimum).Minimum
+          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
+          [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object { $mirror = (Get-Content $env:RUNNER_TEMP\mirrors.list)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)]; $uri = "$mirror$_"; Write-Host "Downloading $_ from $uri"; Invoke-WebRequest -Uri $uri -OutFile C:\msys64\tmp\$_; }
           C:\msys64\usr\bin\bash.exe -lc "pacman -U /tmp/*.pkg.tar.zst --noconfirm"
 
       - name: Add MSYS2 tools to system environment PATH, and set CC and FC environment variables
@@ -139,7 +142,10 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
-          [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object { $mirror = (Get-Content $env:RUNNER_TEMP\mirrors.list)[(Get-Random -Maximum 10)]; Invoke-WebRequest -Uri "$mirror$_" -OutFile C:\msys64\tmp\$_; }
+          $number_of_lines = (Get-Content $env:RUNNER_TEMP\mirrors.list | Measure-Object -Line).Lines
+          $max_mirror = [int](10, $number_of_lines | Measure-Object -Minimum).Minimum
+          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
+          [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object { $mirror = (Get-Content $env:RUNNER_TEMP\mirrors.list)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)]; $uri = "$mirror$_"; Write-Host "Downloading $_ from $uri"; Invoke-WebRequest -Uri $uri -OutFile C:\msys64\tmp\$_; }
           C:\msys64\usr\bin\bash.exe -lc "pacman -U /tmp/*.pkg.tar.zst --noconfirm"
 
       - name: Add MSYS2 tools to system environment PATH, set CC and MINPACK_PREFIX environment variables
