@@ -60,35 +60,42 @@ jobs:
           $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
           $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
+          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string]
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $package = $_;
             $retries = 0;
             $success = $false;
             $max_retries = $number_of_lines;
-            $connection_timeout = 60;
+            $timeout = 30;
 
-            while ((-not $success) -and ($retries -lt $max_retries)) {
+            while ((-not $success) -and ($retries -lt $max_retries))
+            {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
-              $uri = "$mirror$package";
 
-              if ($retries -gt 0)
+              if (-not $failed_mirrors.Contains([string]$mirror))
               {
-                Write-Host "Retry: [$retries] >> Downloading $package from $uri";
-              }
-              else
-              {
-                Write-Host "Downloading $package from $uri";
-              }
+                $uri = "$mirror$package";
 
-              try
-              {
-                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$package;
-                $success = $true;
-              }
-              catch
-              {
-                Write-Host "Failed to download $package from $mirror";
-                $retries++;
+                if ($retries -gt 0)
+                {
+                  Write-Host "Retry: [$retries] >> Downloading $package from $uri";
+                }
+                else
+                {
+                  Write-Host "Downloading $package from $uri";
+                }
+
+                try
+                {
+                  Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
+                  $success = $true;
+                }
+                catch
+                {
+                  Write-Host "Failed to download $package from $mirror";
+                  $failed_mirrors.Add([string]$mirror);
+                  $retries++;
+                }
               }
             }
 
@@ -184,35 +191,42 @@ jobs:
           $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
           $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
+          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string]
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $package = $_;
             $retries = 0;
             $success = $false;
             $max_retries = $number_of_lines;
-            $connection_timeout = 60;
+            $timeout = 30;
 
-            while ((-not $success) -and ($retries -lt $max_retries)) {
+            while ((-not $success) -and ($retries -lt $max_retries))
+            {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
-              $uri = "$mirror$package";
 
-              if ($retries -gt 0)
+              if (-not $failed_mirrors.Contains([string]$mirror))
               {
-                Write-Host "Retry: [$retries] >> Downloading $package from $uri";
-              }
-              else
-              {
-                Write-Host "Downloading $package from $uri";
-              }
+                $uri = "$mirror$package";
 
-              try
-              {
-                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$package;
-                $success = $true;
-              }
-              catch
-              {
-                Write-Host "Failed to download $package from $mirror";
-                $retries++;
+                if ($retries -gt 0)
+                {
+                  Write-Host "Retry: [$retries] >> Downloading $package from $uri";
+                }
+                else
+                {
+                  Write-Host "Downloading $package from $uri";
+                }
+
+                try
+                {
+                  Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
+                  $success = $true;
+                }
+                catch
+                {
+                  Write-Host "Failed to download $package from $mirror";
+                  $failed_mirrors.Add([string]$mirror);
+                  $retries++;
+                }
               }
             }
 
