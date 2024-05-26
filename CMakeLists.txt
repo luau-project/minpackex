@@ -160,7 +160,7 @@ if (IS_ABSOLUTE "${MINPACKEX_INSTALL_PKGCONFIGDIR}")
 endif()
 
 # pkgconfig input file
-set(MINPACKEX_PKGCONFIG_INPUT "cmake/${MINPACKEX_LIBRARY_NAME}.pc.cmakein")
+set(MINPACKEX_PKGCONFIG_INPUT "cmake/${MINPACKEX_LIBRARY_NAME}.pc.in")
 set(MINPACKEX_PKGCONFIG "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_LIBRARY_NAME}.pc")
 
 # minpackex config cmake file to be transformed
@@ -214,7 +214,7 @@ if (BUILD_SHARED_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.so$"))
+    if ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.(so|dylib)$"))
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
@@ -254,7 +254,7 @@ if (BUILD_STATIC_LIBS)
         OUTPUT_NAME ${MINPACKEX_LIBRARY_NAME}
     )
 
-    if ((NOT DEFINED dependencies_lflags) AND ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.so$")))
+    if ((NOT DEFINED dependencies_lflags) AND ((WIN32 AND DEFINED minpack_LIBRARY_DIR AND DEFINED minpack_RUNTIME_DIR) OR (UNIX AND "${minpack_LIBRARY}" MATCHES "libminpack\\.(so|dylib)$")))
         set(dependencies_lflags "\"-L${minpack_LIBRARY_DIR}\" -lminpack")
     endif()
 
@@ -298,21 +298,16 @@ configure_file(
 # the generated minpackex_export.h header file
 # uses __declspec(dllexport) to export functions on shared libraries,
 # and __declspec(dllimport) to use such exported functions.
-# Below, especially eyeing GCC and Clang from MSYS2,
-# we replace __declspec(dllexport) with __attribute__((visibility("default"))),
-# and we also erase __declspec(dllimport) to the empty string.
-# We do this "hack" here to have both shared and static libraries built,
+#
+# Below, especially for GCC and Clang from MSYS2,
+# we replace __declspec(dllimport) with the empty string.
+# We employ this "hack" here to have both shared and static libraries built,
 # not posing any compiler definition (-D<>) for the library user.
 # Doing so also ease tests execution on C.I for such compilers.
-# Be aware that, for now, any custom-compiled
-# gcc/g++ (winlibs's gcc, for instance)
-# should trigger the conditional below,
-# even though winlibs's gcc was not tested.
 
-if (WIN32 AND (CYGWIN OR MINGW OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
+if (WIN32 AND (CYGWIN OR MINGW))
     file(READ "${MINPACKEX_EXPORT_HEADER}" __MINPACKEX_EXPORT_HEADER_CONTENT)
-    string(REPLACE "__declspec(dllexport)" "__attribute__((visibility(\"default\")))" __DLL_EXPORT_REPLACED "${__MINPACKEX_EXPORT_HEADER_CONTENT}")
-    string(REPLACE "__declspec(dllimport)" "" __DLL_IMPORT_REPLACED "${__DLL_EXPORT_REPLACED}")
+    string(REPLACE "__declspec(dllimport)" "" __DLL_IMPORT_REPLACED "${__MINPACKEX_EXPORT_HEADER_CONTENT}")
     file(WRITE "${MINPACKEX_EXPORT_HEADER}" "${__DLL_IMPORT_REPLACED}")
 endif()
 
