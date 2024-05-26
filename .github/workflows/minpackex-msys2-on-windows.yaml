@@ -58,13 +58,15 @@ jobs:
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list
           $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
-          $max_mirror = [int](10, $number_of_lines | Measure-Object -Minimum).Minimum
+          $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $retries = 0;
             $success = $false;
+            $max_retries = $number_of_lines;
+            $connection_timeout = 60;
 
-            while ((-not $success) -and ($retries -lt 10)) {
+            while ((-not $success) -and ($retries -lt $max_retries)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
               $uri = "$mirror$_";
 
@@ -79,7 +81,7 @@ jobs:
 
               try
               {
-                Invoke-WebRequest -Uri $uri -OutFile C:\msys64\tmp\$_;
+                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$_;
                 $success = $true;
               }
               catch
@@ -179,13 +181,15 @@ jobs:
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list
           $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
-          $max_mirror = [int](10, $number_of_lines | Measure-Object -Minimum).Minimum
+          $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $retries = 0;
             $success = $false;
+            $max_retries = $number_of_lines;
+            $connection_timeout = 60;
 
-            while ((-not $success) -and ($retries -lt 10)) {
+            while ((-not $success) -and ($retries -lt $max_retries)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
               $uri = "$mirror$_";
 
@@ -200,7 +204,7 @@ jobs:
 
               try
               {
-                Invoke-WebRequest -Uri $uri -OutFile C:\msys64\tmp\$_;
+                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$_;
                 $success = $true;
               }
               catch
