@@ -64,7 +64,7 @@ jobs:
             $retries = 0;
             $success = $false;
 
-            while ((-not $success) -or ($retries -lt 10)) {
+            while ((-not $success) -and ($retries -lt 10)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
               $uri = "$mirror$_";
 
@@ -185,7 +185,7 @@ jobs:
             $retries = 0;
             $success = $false;
 
-            while ((-not $success) -or ($retries -lt 10)) {
+            while ((-not $success) -and ($retries -lt 10)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
               $uri = "$mirror$_";
 
