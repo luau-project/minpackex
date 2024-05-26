@@ -61,6 +61,7 @@ jobs:
           $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
+            $package = $_;
             $retries = 0;
             $success = $false;
             $max_retries = $number_of_lines;
@@ -68,32 +69,32 @@ jobs:
 
             while ((-not $success) -and ($retries -lt $max_retries)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
-              $uri = "$mirror$_";
+              $uri = "$mirror$package";
 
               if ($retries -gt 0)
               {
-                Write-Host "Retry: [$retries] >> Downloading $_ from $uri";
+                Write-Host "Retry: [$retries] >> Downloading $package from $uri";
               }
               else
               {
-                Write-Host "Downloading $_ from $uri";
+                Write-Host "Downloading $package from $uri";
               }
 
               try
               {
-                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$_;
+                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$package;
                 $success = $true;
               }
               catch
               {
-                Write-Host "Failed to download $_ from $mirror";
+                Write-Host "Failed to download $package from $mirror";
                 $retries++;
               }
             }
 
             if (-not $success)
             {
-              Write-Host "Failed to download $_";
+              Write-Host "Failed to download $package";
               exit 1;
             }
           }
@@ -184,6 +185,7 @@ jobs:
           $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
           $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
+            $package = $_;
             $retries = 0;
             $success = $false;
             $max_retries = $number_of_lines;
@@ -191,32 +193,32 @@ jobs:
 
             while ((-not $success) -and ($retries -lt $max_retries)) {
               $mirror = ($mirrors_content)[(Get-Random -Minimum $min_mirror -Maximum $max_mirror)];
-              $uri = "$mirror$_";
+              $uri = "$mirror$package";
 
               if ($retries -gt 0)
               {
-                Write-Host "Retry: [$retries] >> Downloading $_ from $uri";
+                Write-Host "Retry: [$retries] >> Downloading $package from $uri";
               }
               else
               {
-                Write-Host "Downloading $_ from $uri";
+                Write-Host "Downloading $package from $uri";
               }
 
               try
               {
-                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$_;
+                Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $connection_timeout -OutFile C:\msys64\tmp\$package;
                 $success = $true;
               }
               catch
               {
-                Write-Host "Failed to download $_ from $mirror";
+                Write-Host "Failed to download $package from $mirror";
                 $retries++;
               }
             }
 
             if (-not $success)
             {
-              Write-Host "Failed to download $_";
+              Write-Host "Failed to download $package";
               exit 1;
             }
           }
