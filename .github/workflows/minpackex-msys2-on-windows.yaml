@@ -56,11 +56,12 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
-          $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list
-          $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
-          $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
-          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
-          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string]
+          $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;
+          $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines;
+          $max_mirror = [int]$number_of_lines;
+          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum;
+          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string];
+          $ProgressPreference = 'SilentlyContinue';
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $package = $_;
             $retries = 0;
@@ -87,13 +88,13 @@ jobs:
 
                 try
                 {
-                  Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
+                  Invoke-WebRequest -Uri $uri -MaximumRetryCount 0 -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
                   $success = $true;
                 }
                 catch
                 {
                   Write-Host "Failed to download $package from $mirror";
-                  $failed_mirrors.Add([string]$mirror);
+                  $added = $failed_mirrors.Add([string]$mirror);
                   $retries++;
                 }
               }
@@ -187,11 +188,12 @@ jobs:
           C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
-          $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list
-          $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines
-          $max_mirror = [int](15, $number_of_lines | Measure-Object -Minimum).Minimum
-          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum
-          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string]
+          $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;
+          $number_of_lines = ($mirrors_content | Measure-Object -Line).Lines;
+          $max_mirror = [int]$number_of_lines;
+          $min_mirror = [int](3, $max_mirror, $number_of_lines | Measure-Object -Minimum).Minimum;
+          $failed_mirrors = New-Object System.Collections.Generic.HashSet[string];
+          $ProgressPreference = 'SilentlyContinue';
           [System.IO.File]::ReadAllLines((Get-Item $env:RUNNER_TEMP\packages.list).FullName) | ForEach-Object {
             $package = $_;
             $retries = 0;
@@ -218,13 +220,13 @@ jobs:
 
                 try
                 {
-                  Invoke-WebRequest -Uri $uri -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
+                  Invoke-WebRequest -Uri $uri -MaximumRetryCount 0 -ConnectionTimeoutSeconds $timeout -OperationTimeoutSeconds $timeout -OutFile C:\msys64\tmp\$package;
                   $success = $true;
                 }
                 catch
                 {
                   Write-Host "Failed to download $package from $mirror";
-                  $failed_mirrors.Add([string]$mirror);
+                  $added = $failed_mirrors.Add([string]$mirror);
                   $retries++;
                 }
               }
