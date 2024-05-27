@@ -79,7 +79,7 @@ jobs:
 
                 if ($retries -gt 0)
                 {
-                  Write-Host "Retry[$retries] >> Downloading $package from $uri" -ForegroundColor Yellow;
+                  C:\msys64\usr\bin\bash.exe -lc "echo -e '\e[32mRetry[\e[33m$retries\e[37m / \e[31m$max_retries\e[32m] >> \e[37mDownloading \e[35m$package\e[37m from \e[36m$uri\e[37m'";
                 }
                 else
                 {
@@ -93,7 +93,7 @@ jobs:
                 }
                 catch
                 {
-                  Write-Host "Failed to download $package from $mirror" -ForegroundColor Yellow;
+                  C:\msys64\usr\bin\bash.exe -lc "echo -e '\e[33mFailed to download $package from $mirror\e[37m'";
                   $added = $failed_mirrors.Add($mirror);
                   $retries++;
                 }
@@ -211,7 +211,7 @@ jobs:
 
                 if ($retries -gt 0)
                 {
-                  Write-Host "Retry[$retries] >> Downloading $package from $uri" -ForegroundColor Yellow;
+                  C:\msys64\usr\bin\bash.exe -lc "echo -e '\e[32mRetry[\e[33m$retries\e[37m / \e[31m$max_retries\e[32m] >> \e[37mDownloading \e[35m$package\e[37m from \e[36m$uri\e[37m'";
                 }
                 else
                 {
@@ -225,7 +225,7 @@ jobs:
                 }
                 catch
                 {
-                  Write-Host "Failed to download $package from $mirror" -ForegroundColor Yellow;
+                  C:\msys64\usr\bin\bash.exe -lc "echo -e '\e[33mFailed to download $package from $mirror\e[37m'";
                   $added = $failed_mirrors.Add($mirror);
                   $retries++;
                 }
