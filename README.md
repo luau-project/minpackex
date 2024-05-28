@@ -36,134 +36,134 @@ The original minpack [[1]](https://www.netlib.org/minpack) is a battle-tested **
 
 * Second, once you compile the original minpack code to a binary, the usual API (which on Linux resembles [minpack.h](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads)) does not allow user data to be shared by optimization routines in a straight forward manner. To address this limitation, we apply a trick in the passage of parameters in order to allow user data to be forwarded to such functions. To further explain this point, see how the parameter ```void *userdata``` works in the basic usage below to perform a function fit on a pair of points $(1, -1)$ and $(4, 5)$ for a model in the form $f(x) = a \cdot x + b$.
 
-    ```c
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <math.h>
-    #include <minpackex.h>
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <minpackex.h>
 
-    typedef double (* model)(double x, const double *params);
+typedef double (* model)(double x, const double *params);
 
-    typedef struct fit_data fit_data;
+typedef struct fit_data fit_data;
 
-    struct fit_data
+struct fit_data
+{
+    double *x;
+    double *y;
+    model f;
+};
+
+static void lmdif1_callback(void *userdata, int m, int n, const double *x, double *fvec, int *info)
+{
+    fit_data *data = (fit_data *)userdata;
+    model f = data->f;
+    double *px = data->x;
+    double *py = data->y;
+
+    for (int i = 0; i < m; i++)
     {
-        double *x;
-        double *y;
-        model f;
-    };
+        fvec[i] = f(px[i], x) - py[i];
+    }
+}
 
-    static void lmdif1_callback(void *userdata, int m, int n, const double *x, double *fvec, int *info)
+static double linear_model(double x, const double *params)
+{
+    double a = params[0];
+    double b = params[1];
+    return a * x + b;
+}
+
+// void minpackex_lmdif1(
+//    void *userdata,
+//    minpackex_lmdif1_callback callback,
+//    int m, int n, double *x, double *fvec, double tol,
+//    int *info, int *iwa, double *wa, int lwa);
+
+int main(void)
+{
+    double x[2] = { 1,  4 };
+    double y[2] = { -1, 5 };
+
+    fit_data data;
+    data.x = x;
+    data.y = y;
+    data.f = linear_model;
+
+    double guess[2] = { 1, 1 };
+    
+    /* size of x and y arrays (m = 2) */
+    int m = sizeof(x) / sizeof(double);
+
+    /*
+    ** size of guess (n = 2),
+    ** which is also the number of unknown parameters
+    ** on the model -> linear_model (a and b)
+    */
+    int n = sizeof(guess) / sizeof(double);
+
+    double tol = sqrt(minpackex_dpmpar(1));
+    int info;
+    int lwa = m * n + 5 * n + m;
+    
+    double *wa = (double *)malloc(lwa * sizeof(double));
+    double *fvec = (double *)malloc(m * sizeof(double));
+    int *iwa = (int *)malloc(n * sizeof(int));
+    
+    minpackex_lmdif1((void *)&data, &lmdif1_callback, m, n, guess, fvec, tol, &info, iwa, wa, lwa);
+
+    printf("\n\n// input:\n\n");
+    printf("// \t (x, y):\n");
+    for (int i = 0; i < m; i++)
     {
-        fit_data *data = (fit_data *)userdata;
-        model f = data->f;
-        double *px = data->x;
-        double *py = data->y;
-
-        for (int i = 0; i < m; i++)
-        {
-            fvec[i] = f(px[i], x) - py[i];
-        }
+        printf("// \t\t (%g, %g)\n", x[i], y[i]);
     }
 
-    static double linear_model(double x, const double *params)
+    printf("\n// \t model:\n");
+    printf("// \t\t y = a * x + b\n\n");
+
+    if (1 <= info && info <= 4)
     {
-        double a = params[0];
-        double b = params[1];
-        return a * x + b;
+        printf("\n// nice fit\n\n");
+        printf("// found parameters:\n");
+        printf("// \t a = %g\n", guess[0]);
+        printf("// \t b = %g\n\n", guess[1]);
+    }
+    else
+    {
+        printf("\n// bad fit\n\n");
     }
 
-    // void minpackex_lmdif1(
-    //    void *userdata,
-    //    minpackex_lmdif1_callback callback,
-    //    int m, int n, double *x, double *fvec, double tol,
-    //    int *info, int *iwa, double *wa, int lwa);
+    free(iwa);
+    free(fvec);
+    free(wa);
 
-    int main(void)
-    {
-        double x[2] = { 1,  4 };
-        double y[2] = { -1, 5 };
-
-        fit_data data;
-        data.x = x;
-        data.y = y;
-        data.f = linear_model;
-
-        double guess[2] = { 1, 1 };
-        
-        /* size of x and y arrays (m = 2) */
-        int m = sizeof(x) / sizeof(double);
-
-        /*
-        ** size of guess (n = 2),
-        ** which is also the number of unknown parameters
-        ** on the model -> linear_model (a and b)
-        */
-        int n = sizeof(guess) / sizeof(double);
-
-        double tol = sqrt(minpackex_dpmpar(1));
-        int info;
-        int lwa = m * n + 5 * n + m;
-        
-        double *wa = (double *)malloc(lwa * sizeof(double));
-        double *fvec = (double *)malloc(m * sizeof(double));
-        int *iwa = (int *)malloc(n * sizeof(int));
-        
-        minpackex_lmdif1((void *)&data, &lmdif1_callback, m, n, guess, fvec, tol, &info, iwa, wa, lwa);
-
-        printf("\n\n// input:\n\n");
-        printf("// \t (x, y):\n");
-        for (int i = 0; i < m; i++)
-        {
-            printf("// \t\t (%g, %g)\n", x[i], y[i]);
-        }
-
-        printf("\n// \t model:\n");
-        printf("// \t\t y = a * x + b\n\n");
-
-        if (1 <= info && info <= 4)
-        {
-            printf("\n// nice fit\n\n");
-            printf("// found parameters:\n");
-            printf("// \t a = %g\n", guess[0]);
-            printf("// \t b = %g\n\n", guess[1]);
-        }
-        else
-        {
-            printf("\n// bad fit\n\n");
-        }
-
-        free(iwa);
-        free(fvec);
-        free(wa);
-
-        return 0;
-    }
-    ```
+    return 0;
+}
+```
 
     Running the example above produces the following output:
 
-    ```c
+```c
 
 
-    // input:
+// input:
 
-    // 	 (x, y):
-    // 		 (1, -1)
-    // 		 (4, 5)
+// 	 (x, y):
+// 		 (1, -1)
+// 		 (4, 5)
 
-    // 	 model:
-    // 		 y = a * x + b
-
-
-    // nice fit
-
-    // found parameters:
-    // 	 a = 2
-    // 	 b = -3
+// 	 model:
+// 		 y = a * x + b
 
 
-    ```
+// nice fit
+
+// found parameters:
+// 	 a = 2
+// 	 b = -3
+
+
+```
 
 ## Continuous Integration
 
