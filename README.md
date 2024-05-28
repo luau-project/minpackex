@@ -53,7 +53,13 @@ struct fit_data
     model f;
 };
 
-static void lmdif1_callback(void *userdata, int m, int n, const double *x, double *fvec, int *info)
+static void lmdif1_callback(
+    void *userdata,
+    int m,
+    int n,
+    const double *x,
+    double *fvec,
+    int *info)
 {
     fit_data *data = (fit_data *)userdata;
     model f = data->f;
@@ -109,7 +115,18 @@ int main(void)
     double *fvec = (double *)malloc(m * sizeof(double));
     int *iwa = (int *)malloc(n * sizeof(int));
     
-    minpackex_lmdif1((void *)&data, &lmdif1_callback, m, n, guess, fvec, tol, &info, iwa, wa, lwa);
+    minpackex_lmdif1(
+        (void *)&data,
+        &lmdif1_callback,
+        m,
+        n,
+        guess,
+        fvec,
+        tol,
+        &info,
+        iwa,
+        wa,
+        lwa);
 
     printf("\n\n// input:\n\n");
     printf("// \t (x, y):\n");
@@ -141,7 +158,7 @@ int main(void)
 }
 ```
 
-    Running the example above produces the following output:
+Running the example above produces the following output:
 
 ```c
 
