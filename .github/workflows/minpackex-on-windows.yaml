@@ -10,7 +10,7 @@ on:
 
 jobs:
   intel-using-minpack-as-cmake-package:
-    name: minpackex with Intel toolchain on Windows using minpack as CMake Package
+    name: minpackex with Intel toolchain on Windows using minpack as CMake package
     runs-on: windows-latest
     strategy:
       matrix:

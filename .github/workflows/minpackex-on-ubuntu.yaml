@@ -10,6 +10,7 @@ on:
 
 jobs:
   build-using-minpack-as-cmake-package:
+    name: minpackex on Ubuntu using minpack as CMake package
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -113,6 +114,7 @@ jobs:
         run: cmake --install $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
 
   build-using-minpack-as-system-library:
+    name: minpackex on Ubuntu using minpack as system library
     runs-on: ubuntu-latest
     strategy:
       matrix:

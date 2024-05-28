@@ -303,7 +303,7 @@ configure_file(
 # we replace __declspec(dllimport) with the empty string.
 # We employ this "hack" here to have both shared and static libraries built,
 # not posing any compiler definition (-D<>) for the library user.
-# Doing so also ease tests execution on C.I for such compilers.
+# Doing so also makes tests execution easier on C.I. for such compilers.
 
 if (WIN32 AND (CYGWIN OR MINGW))
     file(READ "${MINPACKEX_EXPORT_HEADER}" __MINPACKEX_EXPORT_HEADER_CONTENT)
