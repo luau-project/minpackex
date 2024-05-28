@@ -34,7 +34,7 @@ The original minpack [[1]](https://www.netlib.org/minpack) is a battle-tested **
 
 * In the first place, the most important decision to use this library is the safety to employ the original implementation of minimization code, written in Fortran 77, provided by minpack authors [[1]](https://www.netlib.org/minpack), not the code ported to other programming languages by third parties;
 
-* Second, once you compile the original minpack code to a binary, the usual API (which on Linux resembles [minpack.h](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads)) does not allow user data to be shared by optimization routines in a straight forward manner. To address this limitation, we apply a trick in the passage of parameters in order to allow user data to be forwarded to such functions. To further explain this point, see how the parameter ```void *userdata``` works in the basic usage below to perform a function fit on a pair of points $(1, -1)$ and $(4, 5)$ for a model in the form $f(x) = a \cdot x + b$.
+* Second, once you compile the original minpack code to a binary, the usual API (which on Linux resembles minpack.h [[7]](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads)) does not allow user data to be shared by optimization routines in a straight forward manner. To address this limitation, we apply a trick in the passage of parameters in order to allow user data to be forwarded to such functions. To further explain this point, see how the parameter ```void *userdata``` works in the basic usage below to perform a function fit on a pair of points $(1, -1)$ and $(4, 5)$ for a model in the form $f(x) = a \cdot x + b$.
 
 ```c
 #include <stdio.h>
@@ -232,3 +232,4 @@ Browse the [documentation](doc/README.md).
 4. SciPy. Accessed May 2, 2024. [https://github.com/scipy/scipy/tree/main/scipy/optimize/minpack](https://github.com/scipy/scipy/tree/main/scipy/optimize/minpack);
 5. Eigen. Accessed May 2, 2024. [https://eigen.tuxfamily.org/dox/unsupported/index.html](https://eigen.tuxfamily.org/dox/unsupported/index.html);
 6. Modernized Minpack. Accessed May 3, 2024. [https://github.com/fortran-lang/minpack](https://github.com/fortran-lang/minpack);
+7. Debian Science Team repository for minpack. Accessed May 28, 2024. [https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads).
