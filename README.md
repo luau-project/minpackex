@@ -117,7 +117,7 @@ int main(void)
     
     minpackex_lmdif1(
         (void *)&data,
-        &lmdif1_callback,
+        (minpackex_lmdif1_callback)&lmdif1_callback,
         m,
         n,
         guess,
@@ -150,9 +150,9 @@ int main(void)
         printf("\n// bad fit\n\n");
     }
 
-    free(iwa);
-    free(fvec);
-    free(wa);
+    free((void *)iwa);
+    free((void *)fvec);
+    free((void *)wa);
 
     return 0;
 }
