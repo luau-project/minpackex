@@ -2,14 +2,20 @@
 
 An extension to MINPACK-1 library.
 
+| Platform | Build Status | Code Coverage |
+|----------|--------------|---------------|
+| Ubuntu 22.04 | ![ubuntu workflow](https://github.com/luau-project/minpackex/actions/workflows/minpackex-on-ubuntu.yaml/badge.svg?branch=main) | [![Coverage Status](https://coveralls.io/repos/github/luau-project/minpackex/badge.svg?branch=main)](https://coveralls.io/github/luau-project/minpackex?branch=main) |
+| Windows 11 | ![windows workflow](https://github.com/luau-project/minpackex/actions/workflows/minpackex-on-windows.yaml/badge.svg?branch=main) | |
+
 ## Table of Contents
 
 * [Introduction](#introduction)
     * [Description](#description)
     * [What is minpack?](#what-is-minpack)
     * [Why minpackex is needed?](#why-minpackex-is-needed)
-* [Continuous Integration](#continuous-integration)
 * [Documentation](#documentation)
+* [Continuous Integration](#continuous-integration)
+* [Alternatives](#alternatives)
 * [References](#references)
 
 ## Introduction
@@ -28,7 +34,7 @@ The original minpack [[1]](https://www.netlib.org/minpack) is a battle-tested **
 
 > [!IMPORTANT]
 > 
-> Do not confuse the original minpack [[1]](https://www.netlib.org/minpack) written in Fortran 77 with Modernized Minpack [[6]](https://github.com/fortran-lang/minpack). The modern minpack [[6]](https://github.com/fortran-lang/minpack) ported the initial code to newer Fortran standards. Here, we extend the original minpack library, not the modernized version.
+> Do not confuse the original minpack [[1]](https://www.netlib.org/minpack) written in Fortran 77 with Modernized Minpack [[6]](https://github.com/fortran-lang/minpack). The modern minpack [[6]](https://github.com/fortran-lang/minpack) version ported the initial code to newer Fortran standards. Here, we extend the original minpack library, not the modernized version.
 
 ### Why minpackex is needed?
 
@@ -158,7 +164,7 @@ int main(void)
 }
 ```
 
-Running the example above produces the following output:
+Running the sample above produces the following output:
 
 ```c
 
@@ -182,15 +188,13 @@ Running the example above produces the following output:
 
 ```
 
+## Documentation
+
+Browse the [documentation](doc/README.md).
+
 ## Continuous Integration
 
 At the moment, running a total of 276 different tests on multiple settings, the continuous integration on github is able to build and install ```minpackex``` in the following combination of platform / compiler toolchain, asserting that exactly the same output is obtained using either minpackex or minpack.
-
-### Build Status
-
-| Windows 11 | Ubuntu 22.04 |
-|------------|--------------|
-|![windows workflow](https://github.com/luau-project/minpackex/actions/workflows/minpackex-on-windows.yaml/badge.svg?branch=main) | ![ubuntu workflow](https://github.com/luau-project/minpackex/actions/workflows/minpackex-on-ubuntu.yaml/badge.svg?branch=main) |
 
 > [!NOTE]
 > 
@@ -220,9 +224,19 @@ At the moment, running a total of 276 different tests on multiple settings, the 
 | Intel ifort (*GCC-like*) | 2021.10.0 | Intel icl (*GCC-like*) | 2021.10.0 |
 | Nvidia nvfortran | 2023.11 | Nvidia nvc | 2023.11 |
 
-## Documentation
+## Alternatives
 
-Browse the [documentation](doc/README.md).
+Up to date, on different levels of activity, there are many alternatives in a wide number of programming languages:
+
+* Python: SciPy [[4]](https://github.com/scipy/scipy/tree/main/scipy/optimize/minpack) is probably the most famous and used out there;
+* C++: Eigen [[5]](https://eigen.tuxfamily.org/dox/unsupported/index.html), based on cminpack below;
+* Fortran: Modernized Minpack [[6]](https://github.com/fortran-lang/minpack), which seems to allow parallel execution of the algorithms;
+* C/C++: cminpack [[8]](https://github.com/devernay/cminpack) by Frédéric Devernay is a mature code base which I contributed a few times and has been around for almost 20 years (it is also available on Debian / Fedora repositories);
+* C++: QuantLib [[9]](https://github.com/lballabio/QuantLib/tree/master/ql/math/optimization) math optimization;
+* C/C++/Fortran 90: [[10]](https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html) by Burkardt;
+* Java: apache [[11]](https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/fitting/leastsquares/LevenbergMarquardtOptimizer.html);
+* R: minpack.lm [[12]](https://cran.r-project.org/web/packages/minpack.lm/index.html);
+* Julia: MINPACK.jl [[13]](https://github.com/sglyon/MINPACK.jl).
 
 ## References
 
@@ -232,4 +246,10 @@ Browse the [documentation](doc/README.md).
 4. SciPy. Accessed May 2, 2024. [https://github.com/scipy/scipy/tree/main/scipy/optimize/minpack](https://github.com/scipy/scipy/tree/main/scipy/optimize/minpack);
 5. Eigen. Accessed May 2, 2024. [https://eigen.tuxfamily.org/dox/unsupported/index.html](https://eigen.tuxfamily.org/dox/unsupported/index.html);
 6. Modernized Minpack. Accessed May 3, 2024. [https://github.com/fortran-lang/minpack](https://github.com/fortran-lang/minpack);
-7. Debian Science Team repository for minpack. Accessed May 28, 2024. [https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads).
+7. Debian Science Team repository for minpack. Accessed May 28, 2024. [https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads](https://salsa.debian.org/science-team/minpack/-/blob/master/minpack.h?ref_type=heads);
+8. cminpack by Frédéric Devernay. Accessed May 29, 2024 [https://github.com/devernay/cminpack](https://github.com/devernay/cminpack);
+9. QuantLib. Accessed May 29, 2024 [https://github.com/lballabio/QuantLib/tree/master/ql/math/optimization](https://github.com/lballabio/QuantLib/tree/master/ql/math/optimization);
+10. MINPACK by Burkardt. Accessed May 29, 2024 [https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html](https://people.sc.fsu.edu/~jburkardt/f_src/minpack/minpack.html);
+11. LevenbergMarquardtOptimizer by Apache. Accessed May 29, 2024 [https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/fitting/leastsquares/LevenbergMarquardtOptimizer.html](https://commons.apache.org/proper/commons-math/javadocs/api-3.6.1/org/apache/commons/math3/fitting/leastsquares/LevenbergMarquardtOptimizer.html);
+12. minpack.lm in R. Accessed May 29, 2024 [https://cran.r-project.org/web/packages/minpack.lm/index.html](https://cran.r-project.org/web/packages/minpack.lm/index.html);
+13. MINPACK.jl in Julia. Acessed May 29, 2024 [https://github.com/sglyon/MINPACK.jl](https://github.com/sglyon/MINPACK.jl).
