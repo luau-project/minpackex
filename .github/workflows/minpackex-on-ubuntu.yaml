@@ -90,7 +90,7 @@ jobs:
           echo "FC=flang-new-${{ matrix.TOOLCHAIN.VERSION }}" >> $GITHUB_ENV
       
       - name: Install Lcov
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: sudo apt install -f -y lcov
 
       - name: Configure the build of minpack
@@ -113,18 +113,18 @@ jobs:
           echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
       
       - name: Configure the build of minpackex
-        if: ${{ matrix.USE_COVERAGE=='OFF' }}
+        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.TOOLCHAIN.COMPILER!='gcc' || matrix.USE_COVERAGE!='ON' }}
         run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=OFF "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
 
       - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=ON "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
       - name: Code coverage for minpackex
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake --build $MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
 
       - name: Test minpackex
@@ -194,7 +194,7 @@ jobs:
           echo "FC=flang-new-${{ matrix.TOOLCHAIN.VERSION }}" >> $GITHUB_ENV
 
       - name: Install Lcov
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: sudo apt install -f -y lcov
 
       - name: Checkout minpackex repository to minpackex directory
@@ -208,18 +208,18 @@ jobs:
           echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
       
       - name: Configure the build of minpackex
-        if: ${{ matrix.USE_COVERAGE=='OFF' }}
+        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.TOOLCHAIN.COMPILER!='gcc' || matrix.USE_COVERAGE!='ON' }}
         run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=OFF -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
       
       - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=ON -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
       - name: Code coverage for minpackex
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.TOOLCHAIN.COMPILER=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake --build $MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
 
       - name: Test minpackex

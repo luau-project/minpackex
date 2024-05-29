@@ -261,7 +261,7 @@ jobs:
         run: |
           $packages_to_install = "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make"
 
-          if ("${{ matrix.USE_COVERAGE }}" -eq "ON")
+          if ("${{ matrix.BUILD_TESTS }}" -eq "ON" -and "${{ matrix.CMAKE_BUILD_TYPE }}" -eq "Debug" -and "${{ matrix.MSYS2_CONFIG.cc }}" -eq "gcc" -and "${{ matrix.USE_COVERAGE }}" -eq "ON")
           {
             $packages_to_install += " mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-lcov";
           }
@@ -358,18 +358,18 @@ jobs:
           Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
 
       - name: Configure the build of minpackex
-        if: ${{ matrix.USE_COVERAGE=='OFF' }}
+        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.MSYS2_CONFIG.cc!='gcc' || matrix.USE_COVERAGE!='ON' }}
         run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=OFF "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=ON "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
       - name: Code coverage for minpackex
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake --build $env:MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
 
       - name: Test minpackex
@@ -423,7 +423,7 @@ jobs:
         run: |
           $packages_to_install = "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack"
 
-          if ("${{ matrix.USE_COVERAGE }}" -eq "ON")
+          if ("${{ matrix.BUILD_TESTS }}" -eq "ON" -and "${{ matrix.CMAKE_BUILD_TYPE }}" -eq "Debug" -and "${{ matrix.MSYS2_CONFIG.cc }}" -eq "gcc" -and "${{ matrix.USE_COVERAGE }}" -eq "ON")
           {
             $packages_to_install += " mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-lcov";
           }
@@ -501,18 +501,18 @@ jobs:
           Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
 
       - name: Configure the build of minpackex
-        if: ${{ matrix.USE_COVERAGE=='OFF' }}
+        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.MSYS2_CONFIG.cc!='gcc' || matrix.USE_COVERAGE!='ON' }}
         run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=OFF "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=ON "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
       - name: Code coverage for minpackex
-        if: ${{ matrix.USE_COVERAGE=='ON' }}
+        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
         run: cmake --build $env:MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
 
       - name: Test minpackex
