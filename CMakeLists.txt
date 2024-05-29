@@ -46,6 +46,7 @@ cmake_minimum_required(VERSION 3.17)
 set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type.")
 option(BUILD_SHARED_LIBS "Build the shared library." ON)
 option(BUILD_STATIC_LIBS "Build the static library." OFF)
+option(USE_COVERAGE "Use code coverage on tests." OFF)
 
 # at least one kind of library must be built
 if (NOT (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
@@ -186,8 +187,14 @@ include(cmake/FindMinpack.cmake)
 enable_testing()
 
 if (BUILD_TESTING)
+    if (USE_COVERAGE)
+        include(cmake/GccCodeCoverage.cmake)
+    endif()
+
     include(cmake/SetupMinpackexTests.cmake)
 endif()
+
+set(minpackex_coverage_target_list "")
 
 # generate minpackex_export.h
 include(GenerateExportHeader)
@@ -219,6 +226,12 @@ if (BUILD_SHARED_LIBS)
     endif()
 
     if (BUILD_TESTING)
+        if (USE_COVERAGE)
+            if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+                append_coverage_compiler_flags_to_target(${MINPACKEX_SHARED_LIB})
+            endif()
+        endif()
+
         setup_minpackex_tests_for_lib_target(
             ${MINPACKEX_SHARED_LIB}
             ${MINPACKEX_LIBRARY_NAME}
@@ -226,7 +239,10 @@ if (BUILD_SHARED_LIBS)
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"
+            minpackex_shared_lib_coverage_name
         )
+
+        list(APPEND minpackex_coverage_target_list "${minpackex_shared_lib_coverage_name}")
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_SHARED_LIB})
@@ -259,6 +275,12 @@ if (BUILD_STATIC_LIBS)
     endif()
 
     if (BUILD_TESTING)
+        if (USE_COVERAGE)
+            if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+                append_coverage_compiler_flags_to_target(${MINPACKEX_STATIC_LIB})
+            endif()
+        endif()
+        
         setup_minpackex_tests_for_lib_target(
             ${MINPACKEX_STATIC_LIB}
             ${MINPACKEX_LIBRARY_NAME}
@@ -266,10 +288,21 @@ if (BUILD_STATIC_LIBS)
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"
+            minpackex_static_lib_coverage_name
         )
+
+        list(APPEND minpackex_coverage_target_list "${minpackex_static_lib_coverage_name}")
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_STATIC_LIB})
+endif()
+
+if (BUILD_TESTING)
+    if (USE_COVERAGE)
+        if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+            add_custom_target(coverage DEPENDS "${minpackex_coverage_target_list}")
+        endif()
+    endif()
 endif()
 
 set(_dependencies_cflags_list "")
@@ -357,6 +390,11 @@ if (BUILD_TESTING)
 message(STATUS "     Build tests ..................... : ON")
 else()
 message(STATUS "     Build tests ..................... : OFF")
+endif()
+if (USE_COVERAGE)
+message(STATUS "     Code coverage on tests .......... : ON")
+else()
+message(STATUS "     Code coverage on tests .......... : OFF")
 endif()
 message(STATUS " ")
 message(STATUS "   Install directories:")
