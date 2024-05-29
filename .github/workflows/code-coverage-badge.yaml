@@ -17,10 +17,8 @@ jobs:
       - name: Install LCOV + minpack from repositories
         run: sudo apt install -f -y lcov minpack-dev
       
-      - name: Checkout minpackex repository to minpackex directory
+      - name: Checkout minpackex repository
         uses: actions/checkout@v4
-        with:
-          path: minpackex
       
       - name: Set shell variables to build and install directories (minpackex)
         run: |
@@ -28,7 +26,7 @@ jobs:
           echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
       
       - name: Configure the build of minpackex
-        run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=ON -DCOVERAGE_REPORT_TYPE=LCOV -DBUILD_TESTING=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Debug --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+        run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=ON -DCOVERAGE_REPORT_TYPE=LCOV -DBUILD_TESTING=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Debug --install-prefix $MINPACKEX_INSTALLDIR -S . -B $MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $MINPACKEX_BUILDDIR --config Debug
