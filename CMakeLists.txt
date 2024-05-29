@@ -377,6 +377,10 @@ install(
     DESTINATION "${MINPACKEX_INSTALL_LIBDIR}/${MINPACKEX_LIBRARY_NAME}-${PROJECT_VERSION}"
 )
 
+if (BUILD_TESTING AND USE_COVERAGE AND (NOT MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE))
+    message(WARNING "Unfortunately, your configuration is not supported to run code coverage.")
+endif()
+
 message(STATUS "")
 message(STATUS "")
 message(STATUS " ${MINPACKEX_LIBRARY_NAME} ${PROJECT_VERSION} configuration summary:")

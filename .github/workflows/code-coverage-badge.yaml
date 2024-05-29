@@ -1,0 +1,49 @@
+name: Code coverage badge from coveralls.io
+run-name: GCC code coverage for minpackex on Ubuntu
+on:
+  push:
+    branches-ignore:
+      - "doc*"
+  pull_request:
+    branches-ignore:
+      - "doc*"
+
+jobs:
+  coveralls-badge:
+    name: Code coverage badge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install LCOV + minpack from repositories
+        run: sudo apt install -f -y lcov minpack-dev
+      
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set shell variables to build and install directories (minpackex)
+        run: |
+          echo "MINPACKEX_BUILDDIR=$RUNNER_TEMP/minpackex-build" >> $GITHUB_ENV
+          echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
+      
+      - name: Configure the build of minpackex
+        run: cmake -G "Unix Makefiles" -DUSE_COVERAGE=ON -DCOVERAGE_REPORT_TYPE=LCOV -DBUILD_TESTING=ON -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DCMAKE_BUILD_TYPE=Debug --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $MINPACKEX_BUILDDIR --config Debug
+      
+      - name: Code coverage for minpackex
+        run: cmake --build $MINPACKEX_BUILDDIR --target coverage --config Debug
+      
+      - name: Test minpackex
+        run: ctest --test-dir $MINPACKEX_BUILDDIR -C Debug
+
+      - name: Install minpackex
+        run: cmake --install $MINPACKEX_BUILDDIR --config Debug
+      
+      - name: Submit to coveralls.io
+        uses: coverallsapp/github-action@v2
+        with:
+          files: $MINPACKEX_BUILDDIR/minpackex-shared-coverage.info $MINPACKEX_BUILDDIR/minpackex-static-coverage.info
+          format: lcov
