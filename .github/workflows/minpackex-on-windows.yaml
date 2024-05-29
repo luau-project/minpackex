@@ -217,18 +217,6 @@ jobs:
           - { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: gcc }
           - { sys: clang64, env: clang-x86_64, fc: flang, cc: clang }
         
-        include:
-
-          - BUILD_TESTS: 'ON'
-            CMAKE_BUILD_TYPE: 'Debug'
-            MSYS2_CONFIG: { sys: mingw64, env: x86_64, fc: gfortran, cc: gcc }
-            USE_COVERAGE: ['ON', 'OFF']
-
-          - BUILD_TESTS: 'ON'
-            CMAKE_BUILD_TYPE: 'Debug'
-            MSYS2_CONFIG: { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: gcc }
-            USE_COVERAGE: ['ON', 'OFF']
-
         exclude:
           
           - BUILD_SHARED_LIBS: 'OFF'
@@ -257,16 +245,9 @@ jobs:
       #
       # This workaround takes place to avoid a kind of "flooding" on the main MSYS2
       # servers, due the amount of content we have to download in parallel builds.
-      - name: Install Fortran compiler + C compiler + GNU Make (+ Lcov if code coverage is ON)
+      - name: Install Fortran compiler + C compiler + GNU Make
         run: |
-          $packages_to_install = "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make"
-
-          if ("${{ matrix.BUILD_TESTS }}" -eq "ON" -and "${{ matrix.CMAKE_BUILD_TYPE }}" -eq "Debug" -and "${{ matrix.MSYS2_CONFIG.cc }}" -eq "gcc" -and "${{ matrix.USE_COVERAGE }}" -eq "ON")
-          {
-            $packages_to_install += " mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-lcov";
-          }
-
-          C:\msys64\usr\bin\bash.exe -lc "pacman -S $packages_to_install --print > /tmp/url.list"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;
@@ -358,20 +339,11 @@ jobs:
           Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
 
       - name: Configure the build of minpackex
-        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.MSYS2_CONFIG.cc!='gcc' || matrix.USE_COVERAGE!='ON' }}
-        run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=OFF "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
-
-      - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
-        run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=ON "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
+        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
-      - name: Code coverage for minpackex
-        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
-        run: cmake --build $env:MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
-
       - name: Test minpackex
         run: ctest --test-dir $env:MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
 
@@ -393,18 +365,6 @@ jobs:
           - { sys: ucrt64, env: ucrt-x86_64, cc: gcc }
           - { sys: clang64, env: clang-x86_64, cc: clang }
         
-        include:
-
-          - BUILD_TESTS: 'ON'
-            CMAKE_BUILD_TYPE: 'Debug'
-            MSYS2_CONFIG: { sys: mingw64, env: x86_64, fc: gfortran, cc: gcc }
-            USE_COVERAGE: ['ON', 'OFF']
-
-          - BUILD_TESTS: 'ON'
-            CMAKE_BUILD_TYPE: 'Debug'
-            MSYS2_CONFIG: { sys: ucrt64, env: ucrt-x86_64, fc: gfortran, cc: gcc }
-            USE_COVERAGE: ['ON', 'OFF']
-
         exclude:
           
           - BUILD_SHARED_LIBS: 'OFF'
@@ -419,16 +379,9 @@ jobs:
       #
       # This workaround takes place to avoid a kind of "flooding" on the main MSYS2
       # servers, due the amount of content we have to download in parallel builds.
-      - name: Install C compiler + GNU Make + libminpack (+ Lcov if code coverage is ON)
+      - name: Install C compiler + GNU Make + libminpack
         run: |
-          $packages_to_install = "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack"
-
-          if ("${{ matrix.BUILD_TESTS }}" -eq "ON" -and "${{ matrix.CMAKE_BUILD_TYPE }}" -eq "Debug" -and "${{ matrix.MSYS2_CONFIG.cc }}" -eq "gcc" -and "${{ matrix.USE_COVERAGE }}" -eq "ON")
-          {
-            $packages_to_install += " mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-lcov";
-          }
-
-          C:\msys64\usr\bin\bash.exe -lc "pacman -S $packages_to_install --print > /tmp/url.list"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;
@@ -501,20 +454,11 @@ jobs:
           Add-Content $env:GITHUB_ENV "MINPACKEX_INSTALLDIR=$env:RUNNER_TEMP\minpackex-install"
 
       - name: Configure the build of minpackex
-        if: ${{ matrix.BUILD_TESTS!='ON' || matrix.CMAKE_BUILD_TYPE!='Debug' || matrix.MSYS2_CONFIG.cc!='gcc' || matrix.USE_COVERAGE!='ON' }}
-        run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=OFF "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
-
-      - name: Configure the build of minpackex for code coverage
-        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
-        run: cmake -G "MinGW Makefiles" -DUSE_COVERAGE=ON "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
+        run: cmake -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=$env:MINPACK_PREFIX" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $env:MINPACKEX_INSTALLDIR -S minpackex -B $env:MINPACKEX_BUILDDIR
 
       - name: Build minpackex
         run: cmake --build $env:MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
       
-      - name: Code coverage for minpackex
-        if: ${{ matrix.BUILD_TESTS=='ON' && matrix.CMAKE_BUILD_TYPE=='Debug' && matrix.MSYS2_CONFIG.cc=='gcc' && matrix.USE_COVERAGE=='ON' }}
-        run: cmake --build $env:MINPACKEX_BUILDDIR --target coverage --config ${{ matrix.CMAKE_BUILD_TYPE }}
-
       - name: Test minpackex
         run: ctest --test-dir $env:MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
 

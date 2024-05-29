@@ -47,6 +47,7 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type.")
 option(BUILD_SHARED_LIBS "Build the shared library." ON)
 option(BUILD_STATIC_LIBS "Build the static library." OFF)
 option(USE_COVERAGE "Use code coverage on tests." OFF)
+set(COVERAGE_REPORT_TYPE "LCOV" CACHE STRING "Report type for code coverage. Possible values are LCOV (default), GCOVR_XML, GCOVR_HTML and FASTCOV.")
 
 # at least one kind of library must be built
 if (NOT (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
@@ -187,11 +188,22 @@ include(cmake/FindMinpack.cmake)
 enable_testing()
 
 if (BUILD_TESTING)
-    if (USE_COVERAGE)
-        include(cmake/GccCodeCoverage.cmake)
-    endif()
-
     include(cmake/SetupMinpackexTests.cmake)
+endif()
+
+# Whether it is possible to run
+# code coverage or not.
+# For now, code coverage is only supported for GCC on Unix
+set(MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE
+    UNIX AND (NOT (CYGWIN OR MINGW)) AND BUILD_TESTING AND
+    CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+    "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
+
+# Whether to perform code coverage or not.
+set(MINPACKEX_PERFORM_COVERAGE MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE AND USE_COVERAGE)
+
+if (MINPACKEX_PERFORM_COVERAGE)
+    include(cmake/GccCodeCoverage.cmake)
 endif()
 
 set(minpackex_coverage_target_list "")
@@ -226,10 +238,8 @@ if (BUILD_SHARED_LIBS)
     endif()
 
     if (BUILD_TESTING)
-        if (USE_COVERAGE)
-            if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-                append_coverage_compiler_flags_to_target(${MINPACKEX_SHARED_LIB})
-            endif()
+        if (MINPACKEX_PERFORM_COVERAGE)
+            append_coverage_compiler_flags_to_target(${MINPACKEX_SHARED_LIB})
         endif()
 
         setup_minpackex_tests_for_lib_target(
@@ -239,10 +249,14 @@ if (BUILD_SHARED_LIBS)
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"
+            "${MINPACKEX_PERFORM_COVERAGE}"
+            "${COVERAGE_REPORT_TYPE}"
             minpackex_shared_lib_coverage_name
         )
 
-        list(APPEND minpackex_coverage_target_list "${minpackex_shared_lib_coverage_name}")
+        if (MINPACKEX_PERFORM_COVERAGE)
+            list(APPEND minpackex_coverage_target_list "${minpackex_shared_lib_coverage_name}")
+        endif()
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_SHARED_LIB})
@@ -275,10 +289,8 @@ if (BUILD_STATIC_LIBS)
     endif()
 
     if (BUILD_TESTING)
-        if (USE_COVERAGE)
-            if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-                append_coverage_compiler_flags_to_target(${MINPACKEX_STATIC_LIB})
-            endif()
+        if (MINPACKEX_PERFORM_COVERAGE)
+            append_coverage_compiler_flags_to_target(${MINPACKEX_STATIC_LIB})
         endif()
         
         setup_minpackex_tests_for_lib_target(
@@ -288,21 +300,21 @@ if (BUILD_STATIC_LIBS)
             "${minpack_RUNTIME_DIR}"
             "${minpack_INCLUDE_DIRS}"
             "${minpack_LIBRARIES}"
+            "${MINPACKEX_PERFORM_COVERAGE}"
+            "${COVERAGE_REPORT_TYPE}"
             minpackex_static_lib_coverage_name
         )
 
-        list(APPEND minpackex_coverage_target_list "${minpackex_static_lib_coverage_name}")
+        if (MINPACKEX_PERFORM_COVERAGE)
+            list(APPEND minpackex_coverage_target_list "${minpackex_static_lib_coverage_name}")
+        endif()
     endif()
 
     list(APPEND targets_to_install ${MINPACKEX_STATIC_LIB})
 endif()
 
-if (BUILD_TESTING)
-    if (USE_COVERAGE)
-        if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-            add_custom_target(coverage DEPENDS "${minpackex_coverage_target_list}")
-        endif()
-    endif()
+if (MINPACKEX_PERFORM_COVERAGE)
+    add_custom_target(coverage DEPENDS "${minpackex_coverage_target_list}")
 endif()
 
 set(_dependencies_cflags_list "")
@@ -391,10 +403,16 @@ message(STATUS "     Build tests ..................... : ON")
 else()
 message(STATUS "     Build tests ..................... : OFF")
 endif()
+if (MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE)
+message(STATUS "")
+message(STATUS "   Code coverage options:")
+message(STATUS "")
 if (USE_COVERAGE)
 message(STATUS "     Code coverage on tests .......... : ON")
 else()
 message(STATUS "     Code coverage on tests .......... : OFF")
+endif()
+message(STATUS "     Coverage report type ............ : ${COVERAGE_REPORT_TYPE}")
 endif()
 message(STATUS " ")
 message(STATUS "   Install directories:")

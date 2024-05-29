@@ -6,6 +6,8 @@ function(
     minpack_dll_dir
     minpack_inc_dirs
     minpack_libs
+    minpackex_run_coverage
+    report_type_for_coverage
     minpackex_lib_coverage_name
 )
     # All-in-one test setup
@@ -23,22 +25,44 @@ function(
         ${MINPACKEX_ALL_IN_ONE_TEST_NAME}
         PRIVATE
         "tests/tall-in-one-driver.c")
+    
+    if (minpackex_run_coverage)
+        set(__cov_target "${minpackex_lib_name}-${target_kind}-coverage")
 
-    if (USE_COVERAGE)
-        if (CMAKE_C_COMPILER_ID STREQUAL "GNU" AND "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-            set(__cov_target "${minpackex_lib_name}-${target_kind}-coverage")
+        set(${minpackex_lib_coverage_name} ${__cov_target} PARENT_SCOPE)
 
-            set(${minpackex_lib_coverage_name} "${__cov_target}" PARENT_SCOPE)
-
-            append_coverage_compiler_flags_to_target(${MINPACKEX_ALL_IN_ONE_TEST_NAME})
-            
+        append_coverage_compiler_flags_to_target(${MINPACKEX_ALL_IN_ONE_TEST_NAME})
+        
+        if ("${report_type_for_coverage}" STREQUAL "LCOV")
             setup_target_for_coverage_lcov(
                 NAME ${__cov_target}
                 EXECUTABLE ${MINPACKEX_ALL_IN_ONE_TEST_NAME}
                 EXCLUDE "${PROJECT_SOURCE_DIR}/tests/*"
                 EXECUTABLE_ARGS ${MINPACKEX_ALL_IN_ONE_TEST_ARGS}
             )
-        else() # other compilers
+        elseif ("${report_type_for_coverage}" STREQUAL "GCOVR_HTML")
+            setup_target_for_coverage_gcovr_html(
+                NAME ${__cov_target}
+                EXECUTABLE ${MINPACKEX_ALL_IN_ONE_TEST_NAME}
+                EXCLUDE "${PROJECT_SOURCE_DIR}/tests/*"
+                EXECUTABLE_ARGS ${MINPACKEX_ALL_IN_ONE_TEST_ARGS}
+            )
+        elseif ("${report_type_for_coverage}" STREQUAL "GCOVR_XML")
+            setup_target_for_coverage_gcovr_xml(
+                NAME ${__cov_target}
+                EXECUTABLE ${MINPACKEX_ALL_IN_ONE_TEST_NAME}
+                EXCLUDE "${PROJECT_SOURCE_DIR}/tests/*"
+                EXECUTABLE_ARGS ${MINPACKEX_ALL_IN_ONE_TEST_ARGS}
+            )
+        elseif ("${report_type_for_coverage}" STREQUAL "FASTCOV")
+            setup_target_for_coverage_fastcov(
+                NAME ${__cov_target}
+                EXECUTABLE ${MINPACKEX_ALL_IN_ONE_TEST_NAME}
+                EXCLUDE "${PROJECT_SOURCE_DIR}/tests/*"
+                EXECUTABLE_ARGS ${MINPACKEX_ALL_IN_ONE_TEST_ARGS}
+            )
+        else()
+            message(FATAL_ERROR "Unsupported coverage report type.")
         endif()
     endif()
     
