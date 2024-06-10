@@ -34,7 +34,7 @@ jobs:
     steps:
 
       - name: Setup LLVM flang-new (MSVC-like)
-        uses: .github/workflows/setup-llvm-flang-new-msvc-like.yaml
+        uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
         with:
           cc: ${{ matrix.C_COMPILER }}
           cxx: ${{ matrix.C_COMPILER }}
@@ -117,7 +117,7 @@ jobs:
     steps:
 
       - name: Setup LLVM flang-new (MSVC-like)
-        uses: .github/workflows/setup-llvm-flang-new-msvc-like.yaml
+        uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
         with:
           cc: ${{ matrix.C_COMPILER }}
           cxx: ${{ matrix.C_COMPILER }}
