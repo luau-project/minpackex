@@ -11,20 +11,10 @@ on:
       - doc/**
 
 jobs:
-  setup-llvm-flang-new-msvc-like:
-    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
-    with:
-      cc: ${{ matrix.C_COMPILER }}
-      cxx: ${{ matrix.C_COMPILER }}
-
-    strategy:
-      matrix:
-        C_COMPILER: ['clang-cl', 'cl']
 
   llvm-flang-new-msvc-like-using-minpack-as-cmake-package:
     name: minpackex with LLVM flang-new (MSVC-like) toolchain on Windows using minpack as CMake package
     runs-on: windows-latest
-    needs: setup-llvm-flang-new-msvc-like
     strategy:
       matrix:
         USE_DOWNLOAD: ['OFF']
@@ -32,6 +22,7 @@ jobs:
         BUILD_SHARED_LIBS: ['ON', 'OFF']
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
+        C_COMPILER: ['clang-cl', 'cl']
         
         exclude:
           
@@ -41,8 +32,23 @@ jobs:
           - BUILD_SHARED_LIBS: 'ON'
             BUILD_STATIC_LIBS: 'ON'
 
-    
     steps:
+      - name: Setup Ninja
+        run: choco install ninja
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+      
+      - name: Setup miniconda, install LLVM flang-new (MSVC-like) from conda-forge, and set FC, CC and CXX environment variables.
+        run: |
+          & "$env:CONDA\shell\condabin\conda-hook.ps1";
+          conda activate "$env:CONDA";
+          conda install --yes -c conda-forge -n base flang libflang libfortran-main;
+          Get-ChildItem env: | Where-Object { $_.Name.ToLower().Contains("conda") -or $_.Value.ToLower().Contains("conda") } | ForEach-Object { Add-Content $env:GITHUB_ENV ($_.Name + "=" + $_.Value); }
+          Add-Content $env:GITHUB_ENV "FC=flang-new";
+          Add-Content $env:GITHUB_ENV "CC=${{ inputs.cc }}";
+          Add-Content $env:GITHUB_ENV "CXX=${{ inputs.cxx }}";
+          Add-Content $env:GITHUB_ENV "CMAKE_GENERATOR=Ninja";
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
@@ -102,7 +108,6 @@ jobs:
   llvm-flang-new-msvc-like-using-minpack-as-system-library:
     name: minpackex with LLVM flang-new (MSVC-like) toolchain on Windows using minpack as system library
     runs-on: windows-latest
-    needs: setup-llvm-flang-new-msvc-like
     strategy:
       matrix:
         USE_DOWNLOAD: ['OFF']
@@ -110,6 +115,7 @@ jobs:
         BUILD_SHARED_LIBS: ['ON', 'OFF']
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
+        C_COMPILER: ['clang-cl', 'cl']
 
         exclude:
           
@@ -120,6 +126,22 @@ jobs:
             BUILD_STATIC_LIBS: 'ON'
 
     steps:
+      - name: Setup Ninja
+        run: choco install ninja
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+      
+      - name: Setup miniconda, install LLVM flang-new (MSVC-like) from conda-forge, and set FC, CC and CXX environment variables.
+        run: |
+          & "$env:CONDA\shell\condabin\conda-hook.ps1";
+          conda activate "$env:CONDA";
+          conda install --yes -c conda-forge -n base flang libflang libfortran-main;
+          Get-ChildItem env: | Where-Object { $_.Name.ToLower().Contains("conda") -or $_.Value.ToLower().Contains("conda") } | ForEach-Object { Add-Content $env:GITHUB_ENV ($_.Name + "=" + $_.Value); }
+          Add-Content $env:GITHUB_ENV "FC=flang-new";
+          Add-Content $env:GITHUB_ENV "CC=${{ inputs.cc }}";
+          Add-Content $env:GITHUB_ENV "CXX=${{ inputs.cxx }}";
+          Add-Content $env:GITHUB_ENV "CMAKE_GENERATOR=Ninja";
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
