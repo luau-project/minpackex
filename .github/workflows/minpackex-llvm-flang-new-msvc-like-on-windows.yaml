@@ -31,13 +31,12 @@ jobs:
           - BUILD_SHARED_LIBS: 'ON'
             BUILD_STATIC_LIBS: 'ON'
 
+    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
+    with:
+      cc: ${{ matrix.C_COMPILER }}
+      cxx: ${{ matrix.C_COMPILER }}
+    
     steps:
-
-      - name: Setup LLVM flang-new (MSVC-like)
-        uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
-        with:
-          cc: ${{ matrix.C_COMPILER }}
-          cxx: ${{ matrix.C_COMPILER }}
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
@@ -114,13 +113,12 @@ jobs:
           - BUILD_SHARED_LIBS: 'ON'
             BUILD_STATIC_LIBS: 'ON'
 
+    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
+    with:
+      cc: ${{ matrix.C_COMPILER }}
+      cxx: ${{ matrix.C_COMPILER }}
+    
     steps:
-
-      - name: Setup LLVM flang-new (MSVC-like)
-        uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
-        with:
-          cc: ${{ matrix.C_COMPILER }}
-          cxx: ${{ matrix.C_COMPILER }}
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
