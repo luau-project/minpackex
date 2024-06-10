@@ -2,11 +2,13 @@ name: minpackex on Windows
 run-name: minpack (multiple Fortran compilers), minpackex (multiple C compilers) on Windows
 on:
   push:
-    branches-ignore:
-      - "doc*"
+    paths-ignore:
+      - "**.md"
+      - doc/**
   pull_request:
-    branches-ignore:
-      - "doc*"
+    paths-ignore:
+      - "**.md"
+      - doc/**
 
 jobs:
   intel-using-minpack-as-cmake-package:

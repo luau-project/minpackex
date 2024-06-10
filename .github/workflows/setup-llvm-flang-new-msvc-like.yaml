@@ -1,0 +1,34 @@
+name: Setup LLVM flang-new (MSVC-like) on Windows
+
+on:
+  workflow_call:
+    inputs:
+      cc:
+        required: false
+        default: clang-cl
+        type: string
+      cxx:
+        required: false
+        default: clang-cl
+        type: string
+
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+    - name: Setup Ninja
+      run: choco install ninja
+
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+    
+    - name: Setup miniconda, install LLVM flang-new (MSVC-like) from conda-forge, and set FC, CC and CXX environment variables.
+      run: |
+        & "$env:CONDA\shell\condabin\conda-hook.ps1";
+        conda activate "$env:CONDA";
+        conda install --yes -c conda-forge -n base flang libflang libfortran-main;
+        Get-ChildItem env: | Where-Object { $_.Name.ToLower().Contains("conda") -or $_.Value.ToLower().Contains("conda") } | ForEach-Object { Add-Content $env:GITHUB_ENV ($_.Name + "=" + $_.Value); }
+        Add-Content $env:GITHUB_ENV "FC=flang-new";
+        Add-Content $env:GITHUB_ENV "CC=${{ inputs.cc }}";
+        Add-Content $env:GITHUB_ENV "CXX=${{ inputs.cxx }}";
+        Add-Content $env:GITHUB_ENV "CMAKE_GENERATOR=Ninja";
