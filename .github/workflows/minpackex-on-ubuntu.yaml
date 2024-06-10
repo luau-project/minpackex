@@ -70,7 +70,7 @@ jobs:
           version: ${{ matrix.TOOLCHAIN.VERSION }}
       
       - name: Setup GFortran + GCC
-        if: ${{ matrix.TOOLCHAIN.COMPILER='gcc' }}
+        if: ${{ matrix.TOOLCHAIN.COMPILER=='gcc' }}
         run: |
           sudo apt install -y gfortran
           echo "FC=gfortran" >> $GITHUB_ENV;
@@ -161,7 +161,7 @@ jobs:
           version: ${{ matrix.TOOLCHAIN.VERSION }}
       
       - name: Setup GFortran + GCC
-        if: ${{ matrix.TOOLCHAIN.COMPILER='gcc' }}
+        if: ${{ matrix.TOOLCHAIN.COMPILER=='gcc' }}
         run: |
           sudo apt install -y gfortran
           echo "FC=gfortran" >> $GITHUB_ENV;
