@@ -38,9 +38,8 @@ jobs:
           conda install --yes -c conda-forge -n base flang libflang libfortran-main;
           Get-ChildItem env: | Where-Object { $_.Name.ToLower().Contains("conda") -or $_.Value.ToLower().Contains("conda") } | ForEach-Object { Add-Content $env:GITHUB_ENV ($_.Name + "=" + $_.Value); }
           Add-Content $env:GITHUB_ENV "FC=flang-new";
-          Add-Content $env:GITHUB_ENV "CC=${{ inputs.cc }}";
-          Add-Content $env:GITHUB_ENV "CXX=${{ inputs.cxx }}";
-          Add-Content $env:GITHUB_ENV "CMAKE_GENERATOR=Ninja";
+          Add-Content $env:GITHUB_ENV "CC=${{ matrix.C_COMPILER }}";
+          Add-Content $env:GITHUB_ENV "CXX=${{ matrix.C_COMPILER }}";
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
@@ -67,7 +66,7 @@ jobs:
         run: foreach ($current_file in "disclaimer",  "chkder.f",  "dogleg.f",  "dpmpar.f",  "enorm.f",  "fdjac1.f",  "fdjac2.f",  "hybrd1.f",  "hybrd.f",  "hybrj1.f",  "hybrj.f",  "lmder1.f",  "lmder.f",  "lmdif1.f",  "lmdif.f",  "lmpar.f",  "lmstr1.f",  "lmstr.f",  "qform.f",  "qrfac.f",  "qrsolv.f",  "r1mpyq.f",  "r1updt.f",  "rwupdt.f") { Copy-Item "assets\$current_file" "minpack-builder"; }
 
       - name: Configure the build of minpack
-        run: cmake -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
+        run: cmake -G Ninja -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
       
       - name: Build minpack
         run: cmake --build $env:MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
@@ -123,9 +122,8 @@ jobs:
           conda install --yes -c conda-forge -n base flang libflang libfortran-main;
           Get-ChildItem env: | Where-Object { $_.Name.ToLower().Contains("conda") -or $_.Value.ToLower().Contains("conda") } | ForEach-Object { Add-Content $env:GITHUB_ENV ($_.Name + "=" + $_.Value); }
           Add-Content $env:GITHUB_ENV "FC=flang-new";
-          Add-Content $env:GITHUB_ENV "CC=${{ inputs.cc }}";
-          Add-Content $env:GITHUB_ENV "CXX=${{ inputs.cxx }}";
-          Add-Content $env:GITHUB_ENV "CMAKE_GENERATOR=Ninja";
+          Add-Content $env:GITHUB_ENV "CC=${{ matrix.C_COMPILER }}";
+          Add-Content $env:GITHUB_ENV "CXX=${{ matrix.C_COMPILER }}";
 
       - name: Checkout minpack-builder assets
         uses: actions/checkout@v4
@@ -153,7 +151,7 @@ jobs:
         run: foreach ($current_file in "disclaimer",  "chkder.f",  "dogleg.f",  "dpmpar.f",  "enorm.f",  "fdjac1.f",  "fdjac2.f",  "hybrd1.f",  "hybrd.f",  "hybrj1.f",  "hybrj.f",  "lmder1.f",  "lmder.f",  "lmdif1.f",  "lmdif.f",  "lmpar.f",  "lmstr1.f",  "lmstr.f",  "qform.f",  "qrfac.f",  "qrsolv.f",  "r1mpyq.f",  "r1updt.f",  "rwupdt.f") { Copy-Item "assets\$current_file" "minpack-builder"; }
       
       - name: Configure the build of minpack
-        run: cmake -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
+        run: cmake -G Ninja -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $env:MINPACK_INSTALLDIR -S minpack-builder -B $env:MINPACK_BUILDDIR
       
       - name: Build minpack
         run: cmake --build $env:MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
