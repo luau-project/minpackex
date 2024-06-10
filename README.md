@@ -205,10 +205,12 @@ At the moment, running a total of 276 different tests on multiple settings, the 
 | Fortran Compiler | Fortran Compiler Version | C Compiler | C Compiler Version |
 |------------------|------------------|--------------|------------------|
 | GFortran | 14.1.0 | GCC | 14.1.0 |
-| LLVM Flang-new (*GCC-like*) | 18.1.4 | Clang | 18.1.4 |
+| LLVM flang-new (*GCC-like*) | 18.1.6 | Clang | 18.1.6 |
 | Intel LLVM ifx (*MSVC-like*) | 2024.1.0 | MSVC | 19.39.33523.0 |
 | Intel LLVM ifx (*MSVC-like*) | 2024.1.0 | Clang-cl | 16.0.6 |
 | Intel LLVM ifx (*MSVC-like*) | 2024.1.0 | Intel LLVM icx (*MSVC-like*) | 2024.1.0 |
+| LLVM flang-new (*MSVC-like*) | 18.1.7 | MSVC | 19.39.33523.0 |
+| LLVM flang-new (*MSVC-like*) | 18.1.7 | Clang-cl | 18.1.7 |
 | Intel ifort (*MSVC-like*) | 2021.10.0 | MSVC | 19.39.33523.0 |
 | Intel ifort (*MSVC-like*) | 2021.10.0 | Clang-cl | 16.0.6 |
 | Intel ifort (*MSVC-like*) | 2021.10.0 | Intel icl (*MSVC-like*) | 2021.10.0 |
@@ -219,7 +221,7 @@ At the moment, running a total of 276 different tests on multiple settings, the 
 | Fortran Compiler | Fortran Compiler Version | C Compiler | C Compiler Version |
 |------------------|------------------|--------------|------------------|
 | GFortran | 13.1.0 | GCC | 13.1.0 |
-| LLVM Flang-new (*GCC-like*) | 18.1.6 | Clang | 18.1.6 |
+| LLVM flang-new (*GCC-like*) | 18.1.6 | Clang | 18.1.6 |
 | Intel LLVM ifx (*GCC-like*) | 2024.1.2 | Intel LLVM icx (*GCC-like*) | 2024.1.2 |
 | Intel ifort (*GCC-like*) | 2021.10.0 | Intel icl (*GCC-like*) | 2021.10.0 |
 | Nvidia nvfortran | 2023.11 | Nvidia nvc | 2023.11 |

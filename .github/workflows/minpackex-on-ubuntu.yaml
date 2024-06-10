@@ -22,7 +22,7 @@ jobs:
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
         TOOLCHAIN:
-          - {COMPILER: gcc, VERSION: 13}
+          - {COMPILER: 'gcc', VERSION: 13}
           - {COMPILER: intel, VERSION: '2024.1'}
           - {COMPILER: intel-classic, VERSION: '2021.10'}
           - {COMPILER: nvidia-hpc, VERSION: '23.11'}
@@ -62,12 +62,19 @@ jobs:
         run: for current_file in "disclaimer"  "chkder.f"  "dogleg.f"  "dpmpar.f"  "enorm.f"  "fdjac1.f"  "fdjac2.f"  "hybrd1.f"  "hybrd.f"  "hybrj1.f"  "hybrj.f"  "lmder1.f"  "lmder.f"  "lmdif1.f"  "lmdif.f"  "lmpar.f"  "lmstr1.f"  "lmstr.f"  "qform.f"  "qrfac.f"  "qrsolv.f"  "r1mpyq.f"  "r1updt.f"  "rwupdt.f"; do cp assets/${current_file} minpack-builder; done
       
       - name: Setup both compilers for C and Fortran
-        if: ${{ matrix.TOOLCHAIN.COMPILER!='llvm-flang-new' }}
+        if: ${{ matrix.TOOLCHAIN.COMPILER!='llvm-flang-new' && matrix.TOOLCHAIN.COMPILER!='gcc' }}
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
           compiler: ${{ matrix.TOOLCHAIN.COMPILER }}
           version: ${{ matrix.TOOLCHAIN.VERSION }}
+      
+      - name: Setup GFortran + GCC
+        if: ${{ matrix.TOOLCHAIN.COMPILER='gcc' }}
+        run: |
+          sudo apt install -y gfortran
+          echo "FC=gfortran" >> $GITHUB_ENV;
+          echo "CC=gcc" >> $GITHUB_ENV;
       
       - name: Setup LLVM Flang-new (Fortran) and Clang (C) compilers
         if: ${{ matrix.TOOLCHAIN.COMPILER=='llvm-flang-new' }}
@@ -146,12 +153,19 @@ jobs:
         run: sudo apt install -y minpack-dev
 
       - name: Setup both compilers for C and Fortran
-        if: ${{ matrix.TOOLCHAIN.COMPILER!='llvm-flang-new' }}
+        if: ${{ matrix.TOOLCHAIN.COMPILER!='llvm-flang-new' && matrix.TOOLCHAIN.COMPILER!='gcc' }}
         uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
           compiler: ${{ matrix.TOOLCHAIN.COMPILER }}
           version: ${{ matrix.TOOLCHAIN.VERSION }}
+      
+      - name: Setup GFortran + GCC
+        if: ${{ matrix.TOOLCHAIN.COMPILER='gcc' }}
+        run: |
+          sudo apt install -y gfortran
+          echo "FC=gfortran" >> $GITHUB_ENV;
+          echo "CC=gcc" >> $GITHUB_ENV;
       
       - name: Setup LLVM Flang-new (Fortran) and Clang (C) compilers
         if: ${{ matrix.TOOLCHAIN.COMPILER=='llvm-flang-new' }}
