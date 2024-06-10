@@ -11,9 +11,20 @@ on:
       - doc/**
 
 jobs:
+  setup-llvm-flang-new-msvc-like:
+    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
+    with:
+      cc: ${{ matrix.C_COMPILER }}
+      cxx: ${{ matrix.C_COMPILER }}
+
+    strategy:
+      matrix:
+        C_COMPILER: ['clang-cl', 'cl']
+
   llvm-flang-new-msvc-like-using-minpack-as-cmake-package:
     name: minpackex with LLVM flang-new (MSVC-like) toolchain on Windows using minpack as CMake package
     runs-on: windows-latest
+    needs: setup-llvm-flang-new-msvc-like
     strategy:
       matrix:
         USE_DOWNLOAD: ['OFF']
@@ -21,7 +32,6 @@ jobs:
         BUILD_SHARED_LIBS: ['ON', 'OFF']
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
-        C_COMPILER: ['clang-cl', 'cl']
         
         exclude:
           
@@ -31,10 +41,6 @@ jobs:
           - BUILD_SHARED_LIBS: 'ON'
             BUILD_STATIC_LIBS: 'ON'
 
-    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
-    with:
-      cc: ${{ matrix.C_COMPILER }}
-      cxx: ${{ matrix.C_COMPILER }}
     
     steps:
 
@@ -96,6 +102,7 @@ jobs:
   llvm-flang-new-msvc-like-using-minpack-as-system-library:
     name: minpackex with LLVM flang-new (MSVC-like) toolchain on Windows using minpack as system library
     runs-on: windows-latest
+    needs: setup-llvm-flang-new-msvc-like
     strategy:
       matrix:
         USE_DOWNLOAD: ['OFF']
@@ -103,7 +110,6 @@ jobs:
         BUILD_SHARED_LIBS: ['ON', 'OFF']
         BUILD_STATIC_LIBS: ['ON', 'OFF']
         BUILD_TESTS: ['ON', 'OFF']
-        C_COMPILER: ['clang-cl', 'cl']
 
         exclude:
           
@@ -113,11 +119,6 @@ jobs:
           - BUILD_SHARED_LIBS: 'ON'
             BUILD_STATIC_LIBS: 'ON'
 
-    uses: ./.github/workflows/setup-llvm-flang-new-msvc-like.yaml
-    with:
-      cc: ${{ matrix.C_COMPILER }}
-      cxx: ${{ matrix.C_COMPILER }}
-    
     steps:
 
       - name: Checkout minpack-builder assets
