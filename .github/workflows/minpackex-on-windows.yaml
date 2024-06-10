@@ -221,6 +221,10 @@ jobs:
           
           - BUILD_SHARED_LIBS: 'OFF'
             BUILD_STATIC_LIBS: 'OFF'
+    
+    env:
+      # Fortran compiler + C compiler + GNU Make
+      MSYS2_PACKAGES_TO_INSTALL: "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make"
 
     steps:
 
@@ -247,7 +251,7 @@ jobs:
       # servers, due the amount of content we have to download in parallel builds.
       - name: Install Fortran compiler + C compiler + GNU Make
         run: |
-          C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-fc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make --print > /tmp/url.list"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S ${{ env.MSYS2_PACKAGES_TO_INSTALL }} --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;
@@ -370,6 +374,10 @@ jobs:
           - BUILD_SHARED_LIBS: 'OFF'
             BUILD_STATIC_LIBS: 'OFF'
 
+    env:
+      # C compiler + GNU Make + libminpack
+      MSYS2_PACKAGES_TO_INSTALL: "mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack"
+
     steps:
 
       # Here, instead of installing packages in the conventional way,
@@ -381,7 +389,7 @@ jobs:
       # servers, due the amount of content we have to download in parallel builds.
       - name: Install C compiler + GNU Make + libminpack
         run: |
-          C:\msys64\usr\bin\bash.exe -lc "pacman -S mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-cc mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-make mingw-w64-${{ matrix.MSYS2_CONFIG.env }}-libminpack --print > /tmp/url.list"
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S ${{ env.MSYS2_PACKAGES_TO_INSTALL }} --print > /tmp/url.list"
           C:\msys64\usr\bin\bash.exe -lc "for e in `$(cat /tmp/url.list); do echo `$(basename `$e); done" > $env:RUNNER_TEMP\packages.list
           ((Get-Content C:\msys64\etc\pacman.d\mirrorlist.${{ matrix.MSYS2_CONFIG.sys }}).Replace("\r\n", "\n") -match "Server\s*=\s*([^\n]+)") -replace "Server\s*=\s*", "" > $env:RUNNER_TEMP\mirrors.list
           $mirrors_content = Get-Content $env:RUNNER_TEMP\mirrors.list;

@@ -47,7 +47,10 @@ set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type.")
 option(BUILD_SHARED_LIBS "Build the shared library." ON)
 option(BUILD_STATIC_LIBS "Build the static library." OFF)
 option(USE_COVERAGE "Use code coverage on tests." OFF)
+option(RELOCATABLE_PKGCONFIG "Enable the generated pkg-config files (minpackex.pc) to be relocatable." ON)
 set(COVERAGE_REPORT_TYPE "LCOV" CACHE STRING "Report type for code coverage. Possible values are LCOV (default), GCOVR_XML, GCOVR_HTML and FASTCOV.")
+set(SOURCE_ARCHIVE_SUFFIX "" CACHE STRING "Suffix for the source archive.")
+set(BINARY_ARCHIVE_SUFFIX "" CACHE STRING "Suffix for the binary archive.")
 
 # at least one kind of library must be built
 if (NOT (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
@@ -98,6 +101,24 @@ set(MINPACKEX_HEADER_FILES ${MINPACKEX_MAIN_HEADER} ${MINPACKEX_EXPORT_HEADER})
 
 # license files
 set(MINPACKEX_LICENSE_FILES "LICENSE.md")
+
+# uninstall target input file
+set(MINPACKEX_UNINSTALL_TARGET_INPUT "cmake/UninstallMinpackex.cmake.in")
+
+# uninstall target transformed file
+set(MINPACKEX_UNINSTALL_TARGET "${CMAKE_CURRENT_BINARY_DIR}/UninstallMinpackex.cmake")
+
+# binary-* target input file
+set(MINPACKEX_BINARY_ARCHIVE_TARGET_INPUT "cmake/CreateMinpackexBinaryArchive.cmake.in")
+
+# binary-* target transformed file
+set(MINPACKEX_BINARY_ARCHIVE_TARGET "${CMAKE_CURRENT_BINARY_DIR}/CreateMinpackexBinaryArchive.cmake")
+
+# source-* target input file
+set(MINPACKEX_SOURCE_ARCHIVE_TARGET_INPUT "cmake/CreateMinpackexSourceArchive.cmake.in")
+
+# source-* target transformed file
+set(MINPACKEX_SOURCE_ARCHIVE_TARGET "${CMAKE_CURRENT_BINARY_DIR}/CreateMinpackexSourceArchive.cmake")
 
 if (WIN32)
     # def file required to generate import file (.lib) to link shared libraries
@@ -161,6 +182,22 @@ if (IS_ABSOLUTE "${MINPACKEX_INSTALL_PKGCONFIGDIR}")
     message(FATAL_ERROR "MINPACKEX_INSTALL_PKGCONFIGDIR must be a relative path.")
 endif()
 
+if (RELOCATABLE_PKGCONFIG)
+    # eval number of parents directories
+    # between CMAKE_INSTALL_PREFIX and MINPACKEX_INSTALL_PKGCONFIGDIR
+    # to enable a relocatable pkg-config (.pc) file
+    set(__pcfiledir_suffix "")
+    set(__current_parent_dir "${CMAKE_INSTALL_PREFIX}/${MINPACKEX_INSTALL_PKGCONFIGDIR}")
+    while (NOT "${__current_parent_dir}" STREQUAL "${CMAKE_INSTALL_PREFIX}")
+        get_filename_component(__current_parent_dir ${__current_parent_dir} PATH)
+        list(APPEND __pcfiledir_suffix "..")
+    endwhile()
+    list(JOIN __pcfiledir_suffix "/" __pcfiledir_joint_suffix)
+    set(MINPACKEX_PKGCONFIG_PREFIX "\${pcfiledir}/${__pcfiledir_joint_suffix}")
+else()
+    set(MINPACKEX_PKGCONFIG_PREFIX "${CMAKE_INSTALL_PREFIX}")
+endif()
+
 # pkgconfig input file
 set(MINPACKEX_PKGCONFIG_INPUT "cmake/${MINPACKEX_LIBRARY_NAME}.pc.in")
 set(MINPACKEX_PKGCONFIG "${CMAKE_CURRENT_BINARY_DIR}/${MINPACKEX_LIBRARY_NAME}.pc")
@@ -191,16 +228,27 @@ if (BUILD_TESTING)
     include(cmake/SetupMinpackexTests.cmake)
 endif()
 
+# save boolean variables to
+# detect whether it is CYGWIN or MINGW
+if (CYGWIN OR MINGW)
+    set(IS_CIGWIN_OR_MINGW TRUE)
+    set(IS_NOT_CIGWIN_OR_MINGW FALSE)
+else()
+    set(IS_CIGWIN_OR_MINGW FALSE)
+    set(IS_NOT_CIGWIN_OR_MINGW TRUE)
+endif()
+
 # Whether it is possible to run
 # code coverage or not.
 # For now, code coverage is only supported for GCC on Unix
-set(MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE
-    UNIX AND (NOT (CYGWIN OR MINGW)) AND
+if (BUILD_TESTING AND
+    UNIX AND
+    IS_NOT_CIGWIN_OR_MINGW AND
     CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
-    "${CMAKE_BUILD_TYPE}" MATCHES "Debug")
-
-if (NOT BUILD_TESTING)
-    set(MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE OFF)
+    CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE TRUE)
+else()
+    set(MINPACKEX_CONFIG_IS_ELLEGIBLE_FOR_COVERAGE FALSE)
 endif()
 
 # Whether to perform code coverage or not.
@@ -218,6 +266,51 @@ set(minpackex_coverage_target_list "")
 
 # generate minpackex_export.h
 include(GenerateExportHeader)
+
+# generate uninstall target
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${MINPACKEX_UNINSTALL_TARGET}
+)
+
+# generate binary-zip target
+add_custom_target("binary-zip"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=zip -P ${MINPACKEX_BINARY_ARCHIVE_TARGET}
+)
+
+# generate binary-tar-gz target
+add_custom_target("binary-tar-gz"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=gzip -P ${MINPACKEX_BINARY_ARCHIVE_TARGET}
+)
+
+# generate binary-tar-bz2 target
+add_custom_target("binary-tar-bz2"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=bzip2 -P ${MINPACKEX_BINARY_ARCHIVE_TARGET}
+)
+
+# generate binary-tar-xz target
+add_custom_target("binary-tar-xz"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=xz -P ${MINPACKEX_BINARY_ARCHIVE_TARGET}
+)
+
+# generate source-zip target
+add_custom_target("source-zip"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=zip -P ${MINPACKEX_SOURCE_ARCHIVE_TARGET}
+)
+
+# generate source-tar-gz target
+add_custom_target("source-tar-gz"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=gzip -P ${MINPACKEX_SOURCE_ARCHIVE_TARGET}
+)
+
+# generate source-tar-bz2 target
+add_custom_target("source-tar-bz2"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=bzip2 -P ${MINPACKEX_SOURCE_ARCHIVE_TARGET}
+)
+
+# generate source-tar-xz target
+add_custom_target("source-tar-xz"
+    COMMAND ${CMAKE_COMMAND} -DMINPACKEX_ARCHIVE_FORMAT=xz -P ${MINPACKEX_SOURCE_ARCHIVE_TARGET}
+)
 
 # build the shared library
 if (BUILD_SHARED_LIBS)
@@ -347,6 +440,21 @@ configure_file(
     ${MINPACKEX_MAIN_HEADER} @ONLY
 )
 
+configure_file(
+    ${MINPACKEX_UNINSTALL_TARGET_INPUT}
+    ${MINPACKEX_UNINSTALL_TARGET} @ONLY
+)
+
+configure_file(
+    ${MINPACKEX_BINARY_ARCHIVE_TARGET_INPUT}
+    ${MINPACKEX_BINARY_ARCHIVE_TARGET} @ONLY
+)
+
+configure_file(
+    ${MINPACKEX_SOURCE_ARCHIVE_TARGET_INPUT}
+    ${MINPACKEX_SOURCE_ARCHIVE_TARGET} @ONLY
+)
+
 # At the moment of writing, on Windows,
 # the generated minpackex_export.h header file
 # uses __declspec(dllexport) to export functions on shared libraries,
@@ -358,7 +466,7 @@ configure_file(
 # not posing any compiler definition (-D<>) for the library user.
 # Doing so also makes tests execution easier on C.I. for such compilers.
 
-if (WIN32 AND (CYGWIN OR MINGW))
+if (WIN32 AND IS_CIGWIN_OR_MINGW)
     file(READ "${MINPACKEX_EXPORT_HEADER}" __MINPACKEX_EXPORT_HEADER_CONTENT)
     string(REPLACE "__declspec(dllimport)" "" __DLL_IMPORT_REPLACED "${__MINPACKEX_EXPORT_HEADER_CONTENT}")
     file(WRITE "${MINPACKEX_EXPORT_HEADER}" "${__DLL_IMPORT_REPLACED}")
@@ -421,10 +529,10 @@ message(STATUS "   Code coverage options:")
 message(STATUS "")
 if (USE_COVERAGE)
 message(STATUS "     Code coverage on tests .......... : ON")
+message(STATUS "     Coverage report type ............ : ${COVERAGE_REPORT_TYPE}")
 else()
 message(STATUS "     Code coverage on tests .......... : OFF")
 endif()
-message(STATUS "     Coverage report type ............ : ${COVERAGE_REPORT_TYPE}")
 endif()
 message(STATUS " ")
 message(STATUS "   Install directories:")
