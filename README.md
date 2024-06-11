@@ -194,7 +194,7 @@ Browse the [documentation](doc/README.md).
 
 ## Continuous Integration
 
-At the moment, running a total of 276 different tests on multiple settings, the continuous integration on github is able to build and install ```minpackex``` in the following combination of platform / compiler toolchain, asserting that exactly the same output is obtained using either minpackex or minpack.
+At the moment, running a total of 300 different tests on multiple settings, the continuous integration on github is able to build and install ```minpackex``` in the following combination of platform / compiler toolchain, asserting that exactly the same output is obtained using either minpackex or minpack.
 
 > [!NOTE]
 > 

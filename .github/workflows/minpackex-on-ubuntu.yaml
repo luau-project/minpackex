@@ -11,6 +11,95 @@ on:
       - doc/**
 
 jobs:
+  vanilla-build-on-multiple-ubuntu:
+    name: minpackex on multiple Ubuntu versions
+    runs-on: ${{ matrix.OS }}
+    strategy:
+      matrix:
+        OS: ['ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-24.04']
+        USE_DOWNLOAD: ['OFF']
+        CMAKE_BUILD_TYPE: ['Release']
+        BUILD_SHARED_LIBS: ['ON']
+        BUILD_STATIC_LIBS: ['ON']
+        BUILD_TESTS: ['ON']
+        USE_SYS_MINPACK: ['ON', 'OFF']
+
+    steps:
+      - name: Install GFortran, then set FC and CC environment variables
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: |
+          sudo apt install -y gfortran;
+          echo "FC=gfortran" >> $GITHUB_ENV;
+          echo "CC=gcc" >> $GITHUB_ENV;
+
+      - name: Install minpack
+        if: ${{ matrix.USE_SYS_MINPACK=='ON' }}
+        run: sudo apt install -y minpack-dev;
+
+      - name: Checkout minpack-builder assets
+        uses: actions/checkout@v4
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' && matrix.USE_SYS_MINPACK=='OFF' }}
+        with:
+          repository: luau-project/minpack-builder
+          ref: assets-ci-v1
+          path: assets
+      
+      - name: Checkout minpack-builder repository to minpack-builder directory
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        uses: actions/checkout@v4
+        with:
+          repository: luau-project/minpack-builder
+          path: minpack-builder
+      
+      - name: Set shell variables to build and install directories (minpack)
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: |
+          echo "MINPACK_BUILDDIR=$RUNNER_TEMP/minpack-build" >> $GITHUB_ENV
+          echo "MINPACK_INSTALLDIR=$RUNNER_TEMP/minpack-install" >> $GITHUB_ENV
+      
+      - name: Download minpack sources
+        if: ${{ matrix.USE_DOWNLOAD=='OFF' && matrix.USE_SYS_MINPACK=='OFF' }}
+        run: for current_file in "disclaimer"  "chkder.f"  "dogleg.f"  "dpmpar.f"  "enorm.f"  "fdjac1.f"  "fdjac2.f"  "hybrd1.f"  "hybrd.f"  "hybrj1.f"  "hybrj.f"  "lmder1.f"  "lmder.f"  "lmdif1.f"  "lmdif.f"  "lmpar.f"  "lmstr1.f"  "lmstr.f"  "qform.f"  "qrfac.f"  "qrsolv.f"  "r1mpyq.f"  "r1updt.f"  "rwupdt.f"; do cp assets/${current_file} minpack-builder; done
+      
+      - name: Configure the build of minpack
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} -DUSE_DOWNLOAD=${{ matrix.USE_DOWNLOAD }} --install-prefix $MINPACK_INSTALLDIR -S minpack-builder -B $MINPACK_BUILDDIR
+      
+      - name: Build minpack
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: cmake --build $MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Install minpack
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: cmake --install $MINPACK_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Checkout minpackex repository to minpackex directory
+        uses: actions/checkout@v4
+        with:
+          path: minpackex
+      
+      - name: Set shell variables to build and install directories (minpackex)
+        run: |
+          echo "MINPACKEX_BUILDDIR=$RUNNER_TEMP/minpackex-build" >> $GITHUB_ENV
+          echo "MINPACKEX_INSTALLDIR=$RUNNER_TEMP/minpackex-install" >> $GITHUB_ENV
+      
+      - name: Configure the build of minpackex using minpack provided by minpack-builder
+        if: ${{ matrix.USE_SYS_MINPACK=='OFF' }}
+        run: cmake -G "Unix Makefiles" "-DCMAKE_PREFIX_PATH=$MINPACK_INSTALLDIR" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+
+      - name: Configure the build of minpackex using minpack provided by the system
+        if: ${{ matrix.USE_SYS_MINPACK=='ON' }}
+        run: cmake -G "Unix Makefiles" -DBUILD_TESTING=${{ matrix.BUILD_TESTS }} -DBUILD_SHARED_LIBS=${{ matrix.BUILD_SHARED_LIBS }} -DBUILD_STATIC_LIBS=${{ matrix.BUILD_STATIC_LIBS }} -DCMAKE_BUILD_TYPE=${{ matrix.CMAKE_BUILD_TYPE }} --install-prefix $MINPACKEX_INSTALLDIR -S minpackex -B $MINPACKEX_BUILDDIR
+
+      - name: Build minpackex
+        run: cmake --build $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+      
+      - name: Test minpackex
+        run: ctest --test-dir $MINPACKEX_BUILDDIR -C ${{ matrix.CMAKE_BUILD_TYPE }}
+
+      - name: Install minpackex
+        run: cmake --install $MINPACKEX_BUILDDIR --config ${{ matrix.CMAKE_BUILD_TYPE }}
+
   build-using-minpack-as-cmake-package:
     name: minpackex on Ubuntu using minpack as CMake package
     runs-on: ubuntu-latest
