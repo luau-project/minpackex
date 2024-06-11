@@ -194,7 +194,7 @@ Browse the [documentation](doc/README.md).
 
 ## Continuous Integration
 
-At the moment, running a total of 300 different tests on multiple settings, the continuous integration on github is able to build and install ```minpackex``` in the following combination of platform / compiler toolchain, asserting that exactly the same output is obtained using either minpackex or minpack.
+At the moment, running a total of 299 different tests on multiple settings, the continuous integration on github is able to build and install ```minpackex``` in the following combination of platform / compiler toolchain, asserting that exactly the same output is obtained using either minpackex or minpack.
 
 > [!NOTE]
 > 
@@ -220,7 +220,7 @@ At the moment, running a total of 300 different tests on multiple settings, the 
 
 | Fortran Compiler | Fortran Compiler Version | C Compiler | C Compiler Version |
 |------------------|------------------|--------------|------------------|
-| GFortran | 13.1.0 | GCC | 13.1.0 |
+| GFortran | 11.4.0 | GCC | 11.4.0 |
 | LLVM flang-new (*GCC-like*) | 18.1.6 | Clang | 18.1.6 |
 | Intel LLVM ifx (*GCC-like*) | 2024.1.2 | Intel LLVM icx (*GCC-like*) | 2024.1.2 |
 | Intel ifort (*GCC-like*) | 2021.10.0 | Intel icl (*GCC-like*) | 2021.10.0 |
