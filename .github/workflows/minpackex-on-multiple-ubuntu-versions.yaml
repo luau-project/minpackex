@@ -13,9 +13,10 @@ on:
 jobs:
   vanilla-build-on-multiple-ubuntu:
     name: minpackex on multiple Ubuntu versions
-    runs-on: ['ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-24.04']
+    runs-on: ${{ matrix.OS }}
     strategy:
       matrix:
+        OS: ['ubuntu-20.04', 'ubuntu-22.04', 'ubuntu-24.04']
         USE_DOWNLOAD: ['OFF']
         CMAKE_BUILD_TYPE: ['Release']
         BUILD_SHARED_LIBS: ['ON']
